@@ -45,7 +45,7 @@ code {
 /* Button styles */
 @layer components {
   .btn-primary {
-    @apply bg-accent text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors;
+    @apply px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover transition-colors;
   }
 
   .btn-secondary {
@@ -57,7 +57,7 @@ code {
   }
 
   .btn-icon {
-    @apply p-1.5 rounded-md hover:bg-bg-primary text-text-primary transition-colors;
+    @apply p-2 rounded-full text-text-secondary hover:bg-bg-primary hover:text-text-primary transition-colors;
   }
 
   .card {
@@ -70,23 +70,25 @@ code {
 
   /* Navbar styles */
   .navbar {
-    @apply bg-bg-secondary border-b border-border px-4 py-3 flex items-center justify-between sticky top-0 z-30 transition-all duration-200;
+    @apply sticky top-0 z-10 bg-bg-secondary border-b border-border flex items-center justify-between px-4 py-2;
+    transition: box-shadow 0.3s ease;
   }
-
+  
   .navbar-scrolled {
     @apply shadow-md;
   }
-
+  
+  /* Navigation links */
   .navbar-link {
-    @apply px-3 py-2 rounded-md text-sm font-medium transition-colors;
+    @apply px-3 py-2 text-sm font-medium rounded-md transition-colors;
   }
-
+  
   .navbar-link-active {
-    @apply bg-bg-primary text-accent;
+    @apply bg-accent bg-opacity-10 text-accent;
   }
-
+  
   .navbar-link-inactive {
-    @apply text-text-secondary hover:bg-bg-primary hover:text-text-primary;
+    @apply text-text-secondary hover:text-text-primary hover:bg-bg-primary;
   }
 
   /* Sidebar styles */
@@ -123,13 +125,46 @@ code {
     @apply w-12 h-12 rounded-lg bg-accent bg-opacity-10 flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-all duration-300;
   }
 
+  /* Search component */
+.search-container {
+  @apply relative flex items-center;
+}
+
+.search-icon-btn {
+  @apply p-2 rounded-full text-text-secondary hover:bg-bg-primary hover:text-text-primary transition-colors;
+}
+
+.search-input-container {
+  @apply relative overflow-hidden transition-all duration-300 ease-in-out;
+}
+
+.search-input {
+  @apply w-full bg-bg-primary border border-border rounded-md py-1.5 pl-10 pr-8 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent focus:ring-opacity-50;
+}
+
+.search-icon {
+  @apply absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary;
+}
+
+.search-shortcut {
+  @apply absolute right-8 top-1/2 -translate-y-1/2 text-xs text-text-secondary opacity-50;
+}
+
+.search-close-btn {
+  @apply absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary p-1;
+}
+
   /* Dropdown styles */
+  .dropdown-container {
+    @apply relative;
+  }
+
   .dropdown-menu {
-    @apply absolute mt-2 bg-bg-secondary border border-border rounded-md shadow-lg py-1 z-10 animate-in fade-in slide-in-from-top-5 duration-200;
+    @apply absolute z-30 mt-2 bg-bg-secondary rounded-md shadow-lg border border-border;
   }
 
   .dropdown-item {
-    @apply block px-4 py-2 text-sm hover:bg-bg-primary transition-colors;
+    @apply block w-full text-left px-4 py-2 text-sm hover:bg-bg-primary transition-colors;
   }
 
   /* Section styles */

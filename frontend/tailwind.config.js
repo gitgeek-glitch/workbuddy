@@ -5,6 +5,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        accent: '#3b82f6', // or whatever color you want
+        'accent-hover': '#2563eb',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

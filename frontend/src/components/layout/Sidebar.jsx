@@ -17,6 +17,7 @@ import {
   FiGitBranch,
   FiMoreHorizontal,
   FiChevronLeft,
+  FiArrowRight,
 } from "react-icons/fi"
 
 import { toggleSidebar, setSidebarCollapsed } from "../../store/slices/uiSlice"
@@ -76,22 +77,16 @@ const Sidebar = () => {
   }
 
   return (
-    <aside ref={sidebarRef} className={`sidebar ${sidebarCollapsed ? "w-16" : "w-64"}`}>
-      <div className="sidebar-header">
-        <Link to="/dashboard" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-accent rounded-md flex items-center justify-center text-white font-bold flex-shrink-0">
-            TC
-          </div>
-          <span
-            className={`font-bold text-lg transition-opacity duration-200 ${sidebarCollapsed ? "opacity-0 w-0" : "opacity-100"}`}
-          >
-            TeamCollab
-          </span>
-        </Link>
-
+    <aside 
+      ref={sidebarRef} 
+      className={`sidebar fixed h-screen bg-gradient-to-b from-bg-secondary/80 to-bg-secondary backdrop-blur-md transition-all duration-300 ease-in-out border-r border-border/30 ${
+        sidebarCollapsed ? "w-20" : "w-72"
+      } z-10`}
+    >
+      <div className="sidebar-header px-4 h-16 flex items-center justify-between border-b border-border/20">
         <button
           onClick={() => dispatch(toggleSidebar())}
-          className={`p-1 rounded-md hover:bg-bg-primary text-text-secondary transition-transform duration-300 ${
+          className={`p-2 rounded-full bg-bg-primary/80 hover:bg-bg-primary text-text-secondary hover:text-accent transition-all duration-300 ease-in-out transform hover:scale-105 ${
             sidebarCollapsed ? "rotate-180" : ""
           }`}
           aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -100,29 +95,46 @@ const Sidebar = () => {
         </button>
       </div>
 
-      <nav className={`p-2 h-[calc(100vh-65px)] overflow-y-auto ${sidebarCollapsed ? "overflow-x-hidden" : ""}`}>
-        <ul className="space-y-1">
+      <nav className={`p-3 h-[calc(100vh-64px)] overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent ${
+        sidebarCollapsed ? "overflow-x-hidden" : ""
+      }`}>
+        <ul className="space-y-2 py-2">
           <li>
             <Link
               to="/dashboard"
-              className={`sidebar-link ${isActive("/dashboard") ? "sidebar-link-active" : "sidebar-link-inactive"}`}
+              className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
+                isActive("/dashboard") 
+                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20" 
+                  : "hover:bg-bg-primary/80 text-text-primary"
+              }`}
               onMouseEnter={() => setHoveredItem("dashboard")}
               onMouseLeave={() => setHoveredItem(null)}
             >
+              {isActive("/dashboard") && (
+                <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
+              )}
               <FiHome
-                size={18}
-                className={`flex-shrink-0 ${isActive("/dashboard") ? "text-accent z-10" : sidebarCollapsed ? "text-text-secondary" : ""}`}
+                size={20}
+                className={`flex-shrink-0 relative z-10 ${
+                  isActive("/dashboard") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
+                }`}
               />
-              <span className={`transition-opacity duration-200 ${sidebarCollapsed ? "opacity-0 w-0" : "opacity-100"}`}>
+              <span className={`ml-3 relative z-10 transition-all duration-200 ${
+                sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+              }`}>
                 Dashboard
               </span>
 
-              {sidebarCollapsed && hoveredItem === "dashboard" && <div className="tooltip left-16">Dashboard</div>}
+              {sidebarCollapsed && hoveredItem === "dashboard" && (
+                <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
+                  Dashboard
+                </div>
+              )}
             </Link>
           </li>
 
           {/* Projects Section */}
-          <li>
+          <li className="mt-2">
             <button
               onClick={() => {
                 if (sidebarCollapsed) {
@@ -131,43 +143,51 @@ const Sidebar = () => {
                   setProjectsExpanded(!projectsExpanded)
                 }
               }}
-              className={`sidebar-section ${sidebarCollapsed ? "hover:bg-bg-primary" : "hover:bg-bg-primary"}`}
+              className={`w-full flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 ${
+                sidebarCollapsed ? "hover:bg-bg-primary/80" : "hover:bg-bg-primary/80"
+              }`}
               onMouseEnter={() => setHoveredItem("projects")}
               onMouseLeave={() => setHoveredItem(null)}
             >
               <div className="flex items-center space-x-3">
-                <FiFolder size={18} className={`flex-shrink-0 ${sidebarCollapsed ? "text-text-secondary" : ""}`} />
+                <FiFolder size={20} className={`flex-shrink-0 ${sidebarCollapsed ? "text-text-secondary" : ""}`} />
                 <span
-                  className={`transition-opacity duration-200 ${sidebarCollapsed ? "opacity-0 w-0" : "opacity-100"}`}
+                  className={`transition-all duration-200 font-medium ${
+                    sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                  }`}
                 >
                   Projects
                 </span>
               </div>
 
               {!sidebarCollapsed && (
-                <>
+                <div className="h-5 w-5 flex items-center justify-center">
                   {projectsExpanded ? (
                     <FiChevronDown size={16} className="text-text-secondary" />
                   ) : (
                     <FiChevronRight size={16} className="text-text-secondary" />
                   )}
-                </>
+                </div>
               )}
 
-              {sidebarCollapsed && hoveredItem === "projects" && <div className="tooltip left-16">Projects</div>}
+              {sidebarCollapsed && hoveredItem === "projects" && (
+                <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
+                  Projects
+                </div>
+              )}
             </button>
 
             {/* Only show project list when sidebar is expanded and projects section is expanded */}
             {!sidebarCollapsed && projectsExpanded && (
-              <ul className="mt-1 space-y-1 pl-6">
+              <ul className="mt-2 space-y-1 pl-4">
                 {projects.map((project) => (
                   <li key={project.id} className="project-menu-container relative">
                     <Link
                       to={`/projects/${project.id}`}
-                      className={`flex items-center space-x-2 px-3 py-1.5 rounded-md transition-colors duration-200 group ${
+                      className={`flex items-center rounded-lg px-4 py-2.5 transition-all duration-200 group ${
                         isActive(`/projects/${project.id}`)
-                          ? "bg-accent bg-opacity-10 text-accent"
-                          : "hover:bg-bg-primary text-text-primary"
+                          ? "bg-accent/10 text-accent font-medium"
+                          : "hover:bg-bg-primary/90 text-text-primary hover:text-accent/80"
                       }`}
                       onClick={() => handleProjectClick(project.id)}
                     >
@@ -177,7 +197,7 @@ const Sidebar = () => {
                         }`}
                       ></span>
 
-                      <span className="truncate">{project.name}</span>
+                      <span className="truncate ml-3">{project.name}</span>
 
                       <button
                         className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded-md hover:bg-bg-primary"
@@ -192,45 +212,49 @@ const Sidebar = () => {
                     </Link>
 
                     {projectMenuOpen === project.id && (
-                      <div className="dropdown-menu right-0 mt-1 w-48">
-                        <button
-                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-bg-primary text-left"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            navigate(`/projects/${project.id}`)
-                            setProjectMenuOpen(null)
-                          }}
-                        >
-                          <FiFolder className="mr-2" />
-                          View project
-                        </button>
-                        <button
-                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-bg-primary text-left"
-                          onClick={(e) => handleStarProject(project.id, e)}
-                        >
-                          <FiStar className="mr-2" />
-                          {starredProjects.some((p) => p.id === project.id) ? "Unstar project" : "Star project"}
-                        </button>
-                        <button
-                          className="flex items-center w-full px-4 py-2 text-sm hover:bg-bg-primary text-left"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            setProjectMenuOpen(null)
-                          }}
-                        >
-                          <FiGitBranch className="mr-2" />
-                          Create branch
-                        </button>
+                      <div className="absolute right-0 mt-1 z-20 w-56 rounded-lg overflow-hidden bg-bg-secondary/95 backdrop-blur-md border border-border/30 shadow-xl">
+                        <div className="p-2">
+                          <button
+                            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-bg-primary/80 hover:text-accent transition-colors text-left"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              navigate(`/projects/${project.id}`)
+                              setProjectMenuOpen(null)
+                            }}
+                          >
+                            <FiArrowRight className="mr-2" />
+                            View project
+                          </button>
+                          <button
+                            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-bg-primary/80 hover:text-accent transition-colors text-left"
+                            onClick={(e) => handleStarProject(project.id, e)}
+                          >
+                            <FiStar className="mr-2" />
+                            {starredProjects.some((p) => p.id === project.id) ? "Unstar project" : "Star project"}
+                          </button>
+                          <button
+                            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-bg-primary/80 hover:text-accent transition-colors text-left"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              setProjectMenuOpen(null)
+                            }}
+                          >
+                            <FiGitBranch className="mr-2" />
+                            Create branch
+                          </button>
+                        </div>
                       </div>
                     )}
                   </li>
                 ))}
 
                 <li>
-                  <button className="flex items-center space-x-2 px-3 py-1.5 rounded-md text-text-secondary hover:bg-bg-primary hover:text-text-primary transition-colors duration-200 w-full">
-                    <FiPlus size={14} />
+                  <button className="flex items-center space-x-2 w-full rounded-lg px-4 py-2.5 text-text-secondary hover:bg-bg-primary/90 hover:text-accent/80 transition-all duration-200 group">
+                    <div className="h-6 w-6 rounded-full bg-bg-primary flex items-center justify-center group-hover:bg-accent/10">
+                      <FiPlus size={14} className="group-hover:text-accent" />
+                    </div>
                     <span>New Project</span>
                   </button>
                 </li>
@@ -239,7 +263,7 @@ const Sidebar = () => {
           </li>
 
           {/* Starred Projects Section */}
-          <li>
+          <li className="mt-2">
             <button
               onClick={() => {
                 if (sidebarCollapsed) {
@@ -248,64 +272,74 @@ const Sidebar = () => {
                   setStarredExpanded(!starredExpanded)
                 }
               }}
-              className={`sidebar-section ${sidebarCollapsed ? "hover:bg-bg-primary" : "hover:bg-bg-primary"} mt-2`}
+              className={`w-full flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 ${
+                sidebarCollapsed ? "hover:bg-bg-primary/80" : "hover:bg-bg-primary/80"
+              }`}
               onMouseEnter={() => setHoveredItem("starred")}
               onMouseLeave={() => setHoveredItem(null)}
             >
               <div className="flex items-center space-x-3">
-                <FiStar size={18} className={`flex-shrink-0 ${sidebarCollapsed ? "text-text-secondary" : ""}`} />
+                <FiStar size={20} className={`flex-shrink-0 ${sidebarCollapsed ? "text-text-secondary" : ""}`} />
                 <span
-                  className={`transition-opacity duration-200 ${sidebarCollapsed ? "opacity-0 w-0" : "opacity-100"}`}
+                  className={`transition-all duration-200 font-medium ${
+                    sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                  }`}
                 >
                   Starred
                 </span>
               </div>
 
               {!sidebarCollapsed && (
-                <>
+                <div className="h-5 w-5 flex items-center justify-center">
                   {starredExpanded ? (
                     <FiChevronDown size={16} className="text-text-secondary" />
                   ) : (
                     <FiChevronRight size={16} className="text-text-secondary" />
                   )}
-                </>
+                </div>
               )}
 
-              {sidebarCollapsed && hoveredItem === "starred" && <div className="tooltip left-16">Starred</div>}
+              {sidebarCollapsed && hoveredItem === "starred" && (
+                <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
+                  Starred
+                </div>
+              )}
             </button>
 
             {!sidebarCollapsed && starredExpanded && (
-              <ul className="mt-1 space-y-1 pl-6">
+              <ul className="mt-2 space-y-1 pl-4">
                 {starredProjects.length > 0 ? (
                   starredProjects.map((project) => (
                     <li key={project.id}>
                       <Link
                         to={`/projects/${project.id}`}
-                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-md transition-colors duration-200 ${
+                        className={`flex items-center rounded-lg px-4 py-2.5 transition-all duration-200 group ${
                           isActive(`/projects/${project.id}`)
-                            ? "bg-accent bg-opacity-10 text-accent"
-                            : "hover:bg-bg-primary text-text-primary"
+                            ? "bg-accent/10 text-accent font-medium"
+                            : "hover:bg-bg-primary/90 text-text-primary hover:text-accent/80"
                         }`}
                         onClick={() => handleProjectClick(project.id)}
                       >
                         <span
-                          className={`w-2 h-2 rounded-full ${
+                          className={`w-2 h-2 rounded-full flex-shrink-0 ${
                             project.status === "active" ? "bg-success" : "bg-warning"
                           }`}
                         ></span>
-                        <span className="truncate">{project.name}</span>
+                        <span className="truncate ml-3">{project.name}</span>
                       </Link>
                     </li>
                   ))
                 ) : (
-                  <li className="px-3 py-2 text-text-secondary text-sm">No starred projects</li>
+                  <li className="px-4 py-3 text-text-secondary text-sm italic rounded-lg bg-bg-primary/50">
+                    No starred projects
+                  </li>
                 )}
               </ul>
             )}
           </li>
 
           {/* Recent Projects Section */}
-          <li>
+          <li className="mt-2">
             <button
               onClick={() => {
                 if (sidebarCollapsed) {
@@ -314,121 +348,174 @@ const Sidebar = () => {
                   setRecentExpanded(!recentExpanded)
                 }
               }}
-              className={`sidebar-section ${sidebarCollapsed ? "hover:bg-bg-primary" : "hover:bg-bg-primary"} mt-2`}
+              className={`w-full flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 ${
+                sidebarCollapsed ? "hover:bg-bg-primary/80" : "hover:bg-bg-primary/80"
+              }`}
               onMouseEnter={() => setHoveredItem("recent")}
               onMouseLeave={() => setHoveredItem(null)}
             >
               <div className="flex items-center space-x-3">
-                <FiGitCommit size={18} className={`flex-shrink-0 ${sidebarCollapsed ? "text-text-secondary" : ""}`} />
+                <FiGitCommit size={20} className={`flex-shrink-0 ${sidebarCollapsed ? "text-text-secondary" : ""}`} />
                 <span
-                  className={`transition-opacity duration-200 ${sidebarCollapsed ? "opacity-0 w-0" : "opacity-100"}`}
+                  className={`transition-all duration-200 font-medium ${
+                    sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                  }`}
                 >
                   Recent
                 </span>
               </div>
 
               {!sidebarCollapsed && (
-                <>
+                <div className="h-5 w-5 flex items-center justify-center">
                   {recentExpanded ? (
                     <FiChevronDown size={16} className="text-text-secondary" />
                   ) : (
                     <FiChevronRight size={16} className="text-text-secondary" />
                   )}
-                </>
+                </div>
               )}
 
-              {sidebarCollapsed && hoveredItem === "recent" && <div className="tooltip left-16">Recent</div>}
+              {sidebarCollapsed && hoveredItem === "recent" && (
+                <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
+                  Recent
+                </div>
+              )}
             </button>
 
             {!sidebarCollapsed && recentExpanded && (
-              <ul className="mt-1 space-y-1 pl-6">
+              <ul className="mt-2 space-y-1 pl-4">
                 {recentProjects.length > 0 ? (
                   recentProjects.map((project) => (
                     <li key={project.id}>
                       <Link
                         to={`/projects/${project.id}`}
-                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-md transition-colors duration-200 ${
+                        className={`flex items-center rounded-lg px-4 py-2.5 transition-all duration-200 group ${
                           isActive(`/projects/${project.id}`)
-                            ? "bg-accent bg-opacity-10 text-accent"
-                            : "hover:bg-bg-primary text-text-primary"
+                            ? "bg-accent/10 text-accent font-medium"
+                            : "hover:bg-bg-primary/90 text-text-primary hover:text-accent/80"
                         }`}
                         onClick={() => handleProjectClick(project.id)}
                       >
                         <span
-                          className={`w-2 h-2 rounded-full ${
+                          className={`w-2 h-2 rounded-full flex-shrink-0 ${
                             project.status === "active" ? "bg-success" : "bg-warning"
                           }`}
                         ></span>
-                        <span className="truncate">{project.name}</span>
+                        <span className="truncate ml-3">{project.name}</span>
                       </Link>
                     </li>
                   ))
                 ) : (
-                  <li className="px-3 py-2 text-text-secondary text-sm">No recent projects</li>
+                  <li className="px-4 py-3 text-text-secondary text-sm italic rounded-lg bg-bg-primary/50">
+                    No recent projects
+                  </li>
                 )}
               </ul>
             )}
           </li>
 
-          <li>
+          <li className="mt-2">
             <Link
-              to="/chat"
-              className={`sidebar-link ${isActive("/chat") ? "sidebar-link-active" : "sidebar-link-inactive"}`}
+              to="/dashboard/chat"
+              className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
+                isActive("/chat") 
+                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20" 
+                  : "hover:bg-bg-primary/80 text-text-primary"
+              }`}
               onMouseEnter={() => setHoveredItem("chat")}
               onMouseLeave={() => setHoveredItem(null)}
             >
+              {isActive("/chat") && (
+                <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
+              )}
               <FiMessageSquare
-                size={18}
-                className={`flex-shrink-0 ${isActive("/chat") ? "text-accent z-10" : sidebarCollapsed ? "text-text-secondary" : ""}`}
+                size={20}
+                className={`flex-shrink-0 relative z-10 ${
+                  isActive("/chat") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
+                }`}
               />
-              <span className={`transition-opacity duration-200 ${sidebarCollapsed ? "opacity-0 w-0" : "opacity-100"}`}>
+              <span className={`ml-3 relative z-10 transition-all duration-200 ${
+                sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+              }`}>
                 Chat
               </span>
 
-              {sidebarCollapsed && hoveredItem === "chat" && <div className="tooltip left-16">Chat</div>}
+              {sidebarCollapsed && hoveredItem === "chat" && (
+                <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
+                  Chat
+                </div>
+              )}
             </Link>
           </li>
 
-          <li>
+          <li className="mt-2">
             <Link
               to="/team"
-              className={`sidebar-link ${isActive("/team") ? "sidebar-link-active" : "sidebar-link-inactive"}`}
+              className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
+                isActive("/team") 
+                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20" 
+                  : "hover:bg-bg-primary/80 text-text-primary"
+              }`}
               onMouseEnter={() => setHoveredItem("team")}
               onMouseLeave={() => setHoveredItem(null)}
             >
+              {isActive("/team") && (
+                <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
+              )}
               <FiUsers
-                size={18}
-                className={`flex-shrink-0 ${isActive("/team") ? "text-accent z-10" : sidebarCollapsed ? "text-text-secondary" : ""}`}
+                size={20}
+                className={`flex-shrink-0 relative z-10 ${
+                  isActive("/team") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
+                }`}
               />
-              <span className={`transition-opacity duration-200 ${sidebarCollapsed ? "opacity-0 w-0" : "opacity-100"}`}>
+              <span className={`ml-3 relative z-10 transition-all duration-200 ${
+                sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+              }`}>
                 Team
               </span>
 
-              {sidebarCollapsed && hoveredItem === "team" && <div className="tooltip left-16">Team</div>}
+              {sidebarCollapsed && hoveredItem === "team" && (
+                <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
+                  Team
+                </div>
+              )}
             </Link>
           </li>
         </ul>
 
-        <div className="mt-6 pt-6 border-t border-border">
-          <ul className="space-y-1">
+        <div className="mt-8 pt-6 border-t border-border/20">
+          <ul className="space-y-2 py-2">
             <li>
               <Link
                 to="/profile"
-                className={`sidebar-link ${isActive("/profile") ? "sidebar-link-active" : "sidebar-link-inactive"}`}
+                className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
+                  isActive("/profile") 
+                    ? "bg-accent text-white font-medium shadow-md shadow-accent/20" 
+                    : "hover:bg-bg-primary/80 text-text-primary"
+                }`}
                 onMouseEnter={() => setHoveredItem("profile")}
                 onMouseLeave={() => setHoveredItem(null)}
               >
+                {isActive("/profile") && (
+                  <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
+                )}
                 <FiSettings
-                  size={18}
-                  className={`flex-shrink-0 ${isActive("/profile") ? "text-accent z-10" : sidebarCollapsed ? "text-text-secondary" : ""}`}
+                  size={20}
+                  className={`flex-shrink-0 relative z-10 ${
+                    isActive("/profile") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
+                  }`}
                 />
-                <span
-                  className={`transition-opacity duration-200 ${sidebarCollapsed ? "opacity-0 w-0" : "opacity-100"}`}
-                >
+                <span className={`ml-3 relative z-10 transition-all duration-200 ${
+                  sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                }`}>
                   Profile
                 </span>
 
-                {sidebarCollapsed && hoveredItem === "profile" && <div className="tooltip left-16">Profile</div>}
+                {sidebarCollapsed && hoveredItem === "profile" && (
+                  <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
+                    Profile
+                  </div>
+                )}
               </Link>
             </li>
           </ul>

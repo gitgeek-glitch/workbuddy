@@ -11,6 +11,8 @@ import {
   FiCheckCircle,
   FiStar,
   FiArrowRight,
+  FiMenu,
+  FiX
 } from "react-icons/fi"
 import { useTheme } from "../context/ThemeContext"
 import ThemeToggle from "../components/ui/ThemeToggle"
@@ -18,6 +20,7 @@ import Hero from "../components/ui/Hero"
 import FeatureCard from "../components/ui/FeatureCard"
 import TestimonialCard from "../components/ui/TestimonialCard"
 import Footer from "../components/layout/Footer"
+import Navbar from "@/components/layout/Navbar"
 
 const Landing = () => {
   const { darkMode } = useTheme()
@@ -28,6 +31,7 @@ const Landing = () => {
     testimonials: false,
     cta: false,
   })
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const heroRef = useRef(null)
   const featuresRef = useRef(null)
@@ -70,66 +74,30 @@ const Landing = () => {
     }
   }, [])
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen)
+  }
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false)
+  }
+
   return (
-    <div className="min-h-screen bg-bg-primary text-text-primary">
+    <div className="min-h-screen bg-bg-primary text-text-primary font-sans">
       {/* Navbar */}
-      <nav className="navbar backdrop-blur-sm bg-opacity-80 fixed w-full z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-2">
-                <FiCode className="h-8 w-8 text-accent" />
-                <span className="font-bold text-xl">TeamCollab</span>
-              </Link>
-              <div className="hidden md:flex md:ml-10 md:space-x-8">
-                <a
-                  href="#features"
-                  className="text-text-secondary hover:text-accent px-3 py-2 text-sm font-medium transition-colors duration-200"
-                >
-                  Features
-                </a>
-                <a
-                  href="#collaboration"
-                  className="text-text-secondary hover:text-accent px-3 py-2 text-sm font-medium transition-colors duration-200"
-                >
-                  Collaboration
-                </a>
-                <a
-                  href="#testimonials"
-                  className="text-text-secondary hover:text-accent px-3 py-2 text-sm font-medium transition-colors duration-200"
-                >
-                  Testimonials
-                </a>
-                <a
-                  href="#"
-                  className="text-text-secondary hover:text-accent px-3 py-2 text-sm font-medium transition-colors duration-200"
-                >
-                  Pricing
-                </a>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <ThemeToggle />
-              <Link
-                to="/login"
-                className="text-text-secondary hover:text-accent px-3 py-2 text-sm font-medium transition-colors duration-200"
-              >
-                Sign in
-              </Link>
-              <Link to="/signup" className="btn-primary text-sm">
-                Sign up
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar/>
 
       {/* Hero Section */}
       <div
         ref={heroRef}
         data-section="hero"
-        className={`transition-all duration-1000 transform ${isVisible.hero ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+        className={`pt-32 pb-20 sm:pt-40 sm:pb-24 relative overflow-hidden transition-all duration-1000 transform ${isVisible.hero ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
       >
+        {/* Decorative gradient blobs */}
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-accent opacity-10 rounded-full filter blur-3xl animate-blob"></div>
+        <div className="absolute -bottom-32 -right-20 w-72 h-72 bg-purple-500 opacity-10 rounded-full filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500 opacity-5 rounded-full filter blur-3xl animate-blob animation-delay-4000"></div>
+        
         <Hero
           title="Collaborate, Create, Conquer"
           subtitle="A powerful platform for teams to collaborate on projects, share files, and communicate in real-time."
@@ -143,50 +111,53 @@ const Landing = () => {
       </div>
 
       {/* Features Section */}
-      <section id="features" ref={featuresRef} data-section="features" className="section">
+      <section id="features" ref={featuresRef} data-section="features" className="py-24 relative">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 bg-grid-pattern bg-bg-primary opacity-5 pointer-events-none"></div>
+        
         <div
-          className={`transition-all duration-1000 transform ${isVisible.features ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+          className={`relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-1000 transform ${isVisible.features ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
         >
-          <div className="text-center mb-16">
-            <h2 className="section-title">Powerful Features</h2>
-            <p className="section-subtitle">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent">Powerful Features</h2>
+            <p className="text-xl text-text-secondary max-w-3xl mx-auto">
               Everything you need to manage your projects and collaborate with your team.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard
-              icon={<FiFileText className="text-accent text-xl" />}
+              icon={<FiFileText className="text-accent text-2xl" />}
               title="File Management"
               description="Upload, organize, and share files with your team. Track versions and collaborate on documents in real-time."
             />
 
             <FeatureCard
-              icon={<FiMessageSquare className="text-accent text-xl" />}
+              icon={<FiMessageSquare className="text-accent text-2xl" />}
               title="Real-time Chat"
               description="Communicate with your team in real-time. Create channels for different topics and share files directly in the chat."
             />
 
             <FeatureCard
-              icon={<FiUsers className="text-accent text-xl" />}
+              icon={<FiUsers className="text-accent text-2xl" />}
               title="Team Management"
               description="Invite team members, assign roles, and manage permissions. Keep track of who's working on what."
             />
 
             <FeatureCard
-              icon={<FiCheckCircle className="text-accent text-xl" />}
+              icon={<FiCheckCircle className="text-accent text-2xl" />}
               title="Task Management"
               description="Create tasks, assign them to team members, and track progress. Set deadlines and priorities."
             />
 
             <FeatureCard
-              icon={<FiGithub className="text-accent text-xl" />}
+              icon={<FiGithub className="text-accent text-2xl" />}
               title="Git Integration"
               description="Connect your GitHub repositories and manage pull requests, code reviews, and issues directly from the platform."
             />
 
             <FeatureCard
-              icon={<FiStar className="text-accent text-xl" />}
+              icon={<FiStar className="text-accent text-2xl" />}
               title="Customization"
               description="Customize the platform to fit your team's needs. Create custom workflows, fields, and views."
             />
@@ -195,62 +166,70 @@ const Landing = () => {
       </section>
 
       {/* Collaboration Section */}
-      <section id="collaboration" ref={collaborationRef} data-section="collaboration" className="section">
+      <section id="collaboration" ref={collaborationRef} data-section="collaboration" className="py-24 bg-bg-secondary relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-bg-primary/20 pointer-events-none"></div>
+        
         <div
-          className={`transition-all duration-1000 transform ${isVisible.collaboration ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+          className={`relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-1000 transform ${isVisible.collaboration ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
         >
-          <div className="flex flex-col lg:flex-row items-center gap-12">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="lg:w-1/2">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-6">Seamless Collaboration</h2>
-              <p className="text-lg text-text-secondary mb-6">
+              <h2 className="text-3xl sm:text-5xl font-bold mb-8 bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent">Seamless Collaboration</h2>
+              <p className="text-xl text-text-secondary mb-8">
                 TeamCollab brings your team together, no matter where they are. Work on projects, share ideas, and make
                 decisions together in real-time.
               </p>
 
-              <ul className="space-y-4">
+              <ul className="space-y-6">
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-success bg-opacity-20 flex items-center justify-center mt-1">
-                    <FiCheckCircle className="text-success text-sm" />
+                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-success bg-opacity-20 flex items-center justify-center mt-1">
+                    <FiCheckCircle className="text-success text-lg" />
                   </div>
-                  <p className="ml-3 text-text-secondary">
-                    <span className="font-medium text-text-primary">Real-time editing</span> - Multiple team members can
+                  <p className="ml-4 text-lg text-text-secondary">
+                    <span className="font-semibold text-text-primary">Real-time editing</span> - Multiple team members can
                     work on the same document simultaneously.
                   </p>
                 </li>
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-success bg-opacity-20 flex items-center justify-center mt-1">
-                    <FiCheckCircle className="text-success text-sm" />
+                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-success bg-opacity-20 flex items-center justify-center mt-1">
+                    <FiCheckCircle className="text-success text-lg" />
                   </div>
-                  <p className="ml-3 text-text-secondary">
-                    <span className="font-medium text-text-primary">Instant feedback</span> - Comment on files, code,
+                  <p className="ml-4 text-lg text-text-secondary">
+                    <span className="font-semibold text-text-primary">Instant feedback</span> - Comment on files, code,
                     and designs to provide feedback quickly.
                   </p>
                 </li>
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-success bg-opacity-20 flex items-center justify-center mt-1">
-                    <FiCheckCircle className="text-success text-sm" />
+                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-success bg-opacity-20 flex items-center justify-center mt-1">
+                    <FiCheckCircle className="text-success text-lg" />
                   </div>
-                  <p className="ml-3 text-text-secondary">
-                    <span className="font-medium text-text-primary">Approval workflows</span> - Set up approval
+                  <p className="ml-4 text-lg text-text-secondary">
+                    <span className="font-semibold text-text-primary">Approval workflows</span> - Set up approval
                     processes for files and changes.
                   </p>
                 </li>
                 <li className="flex items-start">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-success bg-opacity-20 flex items-center justify-center mt-1">
-                    <FiCheckCircle className="text-success text-sm" />
+                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-success bg-opacity-20 flex items-center justify-center mt-1">
+                    <FiCheckCircle className="text-success text-lg" />
                   </div>
-                  <p className="ml-3 text-text-secondary">
-                    <span className="font-medium text-text-primary">Voice and video calls</span> - Jump on a call with
+                  <p className="ml-4 text-lg text-text-secondary">
+                    <span className="font-semibold text-text-primary">Voice and video calls</span> - Jump on a call with
                     your team directly from the platform.
                   </p>
                 </li>
               </ul>
             </div>
 
-            <div className="lg:w-1/2 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-accent to-purple-500 rounded-lg opacity-10 blur-xl"></div>
-              <div className="relative rounded-lg border border-border overflow-hidden shadow-xl transform transition-transform duration-500 hover:scale-[1.02]">
+            <div className="lg:w-1/2 relative mt-12 lg:mt-0">
+              <div className="absolute inset-0 bg-gradient-to-r from-accent to-purple-500 rounded-2xl opacity-20 blur-2xl transform rotate-3"></div>
+              <div className="relative rounded-2xl border border-border/50 overflow-hidden shadow-2xl transform transition-all duration-500 hover:scale-[1.02] hover:shadow-accent/20">
                 <img src="/placeholder.svg?height=400&width=600" alt="Collaboration Features" className="w-full" />
+                
+                {/* Glassmorphism overlay */}
+                <div className="absolute bottom-0 left-0 right-0 bg-bg-primary/80 backdrop-blur-md p-6 border-t border-border/20">
+                  <h3 className="text-xl font-semibold mb-2">Collaboration in action</h3>
+                  <p className="text-text-secondary">Watch how teams collaborate in real-time on TeamCollab</p>
+                </div>
               </div>
 
               {/* Animated elements */}
@@ -262,13 +241,19 @@ const Landing = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" ref={testimonialsRef} data-section="testimonials" className="section">
+      <section id="testimonials" ref={testimonialsRef} data-section="testimonials" className="py-24 relative">
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+        
         <div
-          className={`transition-all duration-1000 transform ${isVisible.testimonials ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+          className={`relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-1000 transform ${isVisible.testimonials ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
         >
-          <div className="text-center mb-16">
-            <h2 className="section-title">What Our Users Say</h2>
-            <p className="section-subtitle">Teams of all sizes use TeamCollab to collaborate and get work done.</p>
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent">What Our Users Say</h2>
+            <p className="text-xl text-text-secondary max-w-3xl mx-auto">
+              Teams of all sizes use TeamCollab to collaborate and get work done.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -297,33 +282,42 @@ const Landing = () => {
       </section>
 
       {/* CTA Section */}
-      <section ref={ctaRef} data-section="cta" className="section">
+      <section ref={ctaRef} data-section="cta" className="py-24">
         <div
-          className={`transition-all duration-1000 transform ${isVisible.cta ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-1000 transform ${isVisible.cta ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
         >
-          <div className="bg-bg-secondary rounded-2xl border border-border p-8 md:p-12 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-accent to-purple-500 opacity-5"></div>
+          <div className="bg-bg-secondary rounded-3xl border border-border/50 p-8 md:p-16 relative overflow-hidden">
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-purple-500/5"></div>
+            
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent opacity-10 rounded-full filter blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 opacity-10 rounded-full filter blur-3xl"></div>
+            
             <div className="relative z-10">
               <div className="text-center max-w-3xl mx-auto">
-                <h2 className="text-3xl sm:text-4xl font-bold mb-4">Ready to transform how your team works?</h2>
-                <p className="text-xl text-text-secondary mb-8">
+                <h2 className="text-3xl sm:text-5xl font-bold mb-6 bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent">Ready to transform how your team works?</h2>
+                <p className="text-xl text-text-secondary mb-10">
                   Join thousands of teams that use TeamCollab to collaborate and get work done.
                 </p>
-                <div className="flex flex-col sm:flex-row justify-center gap-4">
-                  <Link to="/signup" className="btn-primary flex items-center justify-center">
-                    Get started for free
-                    <FiArrowRight className="ml-2" />
+                <div className="flex flex-col sm:flex-row justify-center gap-6">
+                  <Link 
+                    to="/signup" 
+                    className="relative overflow-hidden px-8 py-4 rounded-full bg-gradient-to-r from-accent to-purple-500 text-white font-medium text-lg transition-all duration-300 hover:shadow-lg hover:shadow-accent/20 flex items-center justify-center group"
+                  >
+                    <span className="relative z-10">Get started for free</span>
+                    <FiArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                    <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                   </Link>
-                  <Link to="#" className="btn-outline">
+                  <Link 
+                    to="#" 
+                    className="px-8 py-4 rounded-full border border-border hover:border-accent text-text-primary font-medium text-lg transition-all duration-300 flex items-center justify-center"
+                  >
                     Contact sales
                   </Link>
                 </div>
               </div>
             </div>
-
-            {/* Decorative elements */}
-            <div className="absolute top-0 left-0 w-32 h-32 bg-accent opacity-10 rounded-br-full"></div>
-            <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500 opacity-10 rounded-tl-full"></div>
           </div>
         </div>
       </section>
