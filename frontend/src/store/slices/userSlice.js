@@ -1,57 +1,58 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "axios"
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:7000"
 
 export const signupUser = createAsyncThunk("user/signup", async (signupData, { rejectWithValue }) => {
-    try {
-      const response = await axios.post(`${API_URL}/auth/signup`, signupData)
-      const { token, user } = response.data.data[0]
-  
-      // Save token
-      localStorage.setItem("authToken", token)
-  
-      return user
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Signup failed")
-    }
-  })
+  try {
+    const response = await axios.post(`${API_URL}/api/user/signup`, signupData)
+    const { token, user } = response.data.data[0]
+
+    localStorage.setItem("authToken", token)
+
+    return user
+  } catch (error) {
+    // Return the error message from the server
+    return rejectWithValue(error.response?.data?.message || "Signup failed. Please try again.")
+  }
+})
 
 // Async thunks for user actions
 export const loginUser = createAsyncThunk("user/login", async (credentials, { rejectWithValue }) => {
-    try {
-      const response = await axios.post(`${API_URL}/auth/signin`, {
-        email: credentials.email,
-        password: credentials.password,
-      })
-  
-      const { token, user } = response.data.data[0]
-      
-      console.log("Login response user data:", user);
-      
-      // Normalize user data
-      const normalizedUser = {
-        id: user.id || user._id,
-        name: user.name || user.fullName || user.displayName || "",
-        email: user.email || "",
-        avatar: user.avatar || user.picture || user.photoURL || "",
-        role: user.role || "User",
-        bio: user.bio || "",
-        joinDate: user.joinDate || new Date().toLocaleDateString()
-      };
-  
-      // Store token appropriately
-      if (credentials.rememberMe) {
-        localStorage.setItem("authToken", token)
-      } else {
-        sessionStorage.setItem("authToken", token)
-      }
-  
-      return normalizedUser
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "An error occurred during login. Please try again.")
+  try {
+    const response = await axios.post(`${API_URL}/api/user/signin`, {
+      email: credentials.email,
+      password: credentials.password,
+    })
+
+    const { token, user } = response.data.data[0]
+
+    console.log("Login response user data:", user)
+
+    // Normalize user data
+    const normalizedUser = {
+      id: user.id || user._id,
+      name: user.name || user.fullName || user.displayName || "",
+      email: user.email || "",
+      avatar: user.avatar || user.picture || user.photoURL || "",
+      role: user.role || "User",
+      bio: user.bio || "",
+      joinDate: user.joinDate || new Date().toLocaleDateString(),
     }
-  })
+
+    // Store token appropriately
+    if (credentials.rememberMe) {
+      localStorage.setItem("authToken", token)
+    } else {
+      sessionStorage.setItem("authToken", token)
+    }
+
+    return normalizedUser
+  } catch (error) {
+    // Return the error message from the server
+    return rejectWithValue(error.response?.data?.message || "An error occurred during login. Please try again.")
+  }
+})
 
 export const logoutUser = createAsyncThunk("user/logout", async (_, { rejectWithValue }) => {
   try {
@@ -94,72 +95,65 @@ export const checkAuthState = createAsyncThunk("user/checkAuth", async (_, { rej
 })
 
 export const oauthLogin = createAsyncThunk("user/oauthLogin", async (userData, { rejectWithValue }) => {
-    try {
-      console.log("OAuth login data received:", userData);
-      
-      // Normalize user data regardless of the OAuth provider
-      const normalizedUser = {
-        id: userData.id || userData.sub || userData._id || `user-${Date.now()}`,
-        name: userData.name || userData.fullName || userData.displayName || userData.given_name || "",
-        email: userData.email || "",
-        avatar: userData.picture || userData.photoURL || userData.avatar || "",
-        provider: userData.provider || "google", // Helps identify OAuth users
-        role: userData.role || "User",
-        bio: userData.bio || "",
-        skills: userData.skills || [],
-        joinDate: userData.joinDate || new Date().toLocaleDateString()
-      };
-      
-      // Handle token
-      const token = userData.credential || userData.token || userData.access_token || `oauth-token-${Date.now()}`;
-      localStorage.setItem("authToken", token);
-      
-      console.log("Normalized user data:", normalizedUser);
-      return normalizedUser;
-    } catch (error) {
-      console.error("OAuth login error:", error);
-      return rejectWithValue(error.message);
+  try {
+    console.log("OAuth login data received:", userData)
+
+    // Normalize user data regardless of the OAuth provider
+    const normalizedUser = {
+      id: userData.id || userData.sub || userData._id || `user-${Date.now()}`,
+      name: userData.name || userData.fullName || userData.displayName || userData.given_name || "",
+      email: userData.email || "",
+      avatar: userData.picture || userData.photoURL || userData.avatar || "",
+      provider: userData.provider || "google", // Helps identify OAuth users
+      role: userData.role || "User",
+      bio: userData.bio || "",
+      skills: userData.skills || [],
+      joinDate: userData.joinDate || new Date().toLocaleDateString(),
     }
-  })
+
+    // Handle token
+    const token = userData.credential || userData.token || userData.access_token || `oauth-token-${Date.now()}`
+    localStorage.setItem("authToken", token)
+
+    console.log("Normalized user data:", normalizedUser)
+    return normalizedUser
+  } catch (error) {
+    console.error("OAuth login error:", error)
+    return rejectWithValue(error.message)
+  }
+})
 
 // Add a proper implementation for updateUserProfile
-export const updateUserProfile = createAsyncThunk(
-  "user/updateProfile",
-  async (profileData, { rejectWithValue }) => {
-    try {
-      // Get token from storage
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
-      
-      if (!token) {
-        return rejectWithValue("Authentication required")
-      }
-      
-      const response = await axios.put(
-        `${API_URL}/users/profile`,
-        profileData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      
-      return response.data.data
-    } catch (error) {
-      // If the API call fails, just update the local state
-      // This is temporary until your backend is set up
-      return profileData;
-      
-      // Once your API is ready, use this instead:
-      // return rejectWithValue(error.response?.data?.message || "Failed to update profile")
+export const updateUserProfile = createAsyncThunk("user/updateProfile", async (profileData, { rejectWithValue }) => {
+  try {
+    // Get token from storage
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+
+    if (!token) {
+      return rejectWithValue("Authentication required")
     }
+
+    const response = await axios.put(`${API_URL}/users/profile`, profileData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return response.data.data
+  } catch (error) {
+    // If the API call fails, just update the local state
+    // This is temporary until your backend is set up
+    return profileData
+
+    // Once your API is ready, use this instead:
+    // return rejectWithValue(error.response?.data?.message || "Failed to update profile")
   }
-)
+})
 
 const initialState = {
   currentUser: null,
   isAuthenticated: false,
-  loading: true,
+  loading: false,
   error: null,
 }
 
@@ -170,6 +164,9 @@ const userSlice = createSlice({
     // Local state update without API call
     updateUserProfileLocal: (state, action) => {
       state.currentUser = { ...state.currentUser, ...action.payload }
+    },
+    clearError: (state) => {
+      state.error = null
     },
   },
   extraReducers: (builder) => {
@@ -183,6 +180,7 @@ const userSlice = createSlice({
         state.loading = false
         state.currentUser = action.payload
         state.isAuthenticated = true
+        state.error = null
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
@@ -221,6 +219,7 @@ const userSlice = createSlice({
         state.loading = false
         state.currentUser = action.payload
         state.isAuthenticated = true
+        state.error = null
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false
@@ -242,6 +241,7 @@ const userSlice = createSlice({
   },
 })
 
-export const { updateUserProfileLocal } = userSlice.actions
+export const { updateUserProfileLocal, clearError } = userSlice.actions
 
 export default userSlice.reducer
+

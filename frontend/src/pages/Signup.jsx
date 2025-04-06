@@ -1,21 +1,18 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { FiGithub } from "react-icons/fi"
 import { FcGoogle } from "react-icons/fc"
-import axios from "axios"
-import { debounce } from "lodash"
 import { signupUser } from "../store/slices/userSlice"
-import ThemeToggle from "../components/ui/ThemeToggle"
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:7000"
 
 const Signup = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { loading } = useSelector((state) => state.user)
+  const { loading, error: reduxError } = useSelector((state) => state.user)
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -33,7 +30,7 @@ const Signup = () => {
   })
 
   // Create a debounced function for checking username availability
-  const checkUsernameAvailability = debounce(async (username) => {
+  const checkUsernameAvailability = async (username) => {
     if (!username || username.length < 3) {
       setUsernameStatus({
         checking: false,
@@ -46,13 +43,13 @@ const Signup = () => {
     setUsernameStatus((prev) => ({ ...prev, checking: true }))
 
     try {
-      const response = await axios.get(`${API_URL}/auth/check-username?username=${encodeURIComponent(username)}`)
-      const { available, message } = response.data
+      const response = await fetch(`${API_URL}/api/user/check-username?username=${encodeURIComponent(username)}`)
+      const data = await response.json()
 
       setUsernameStatus({
         checking: false,
-        available,
-        message,
+        available: data.available,
+        message: data.message,
       })
     } catch (error) {
       setUsernameStatus({
@@ -61,17 +58,18 @@ const Signup = () => {
         message: "Error checking username",
       })
     }
-  }, 500)
+  }
 
-  useEffect(() => {
-    if (formData.username) {
-      checkUsernameAvailability(formData.username)
-    }
-
-    return () => {
-      checkUsernameAvailability.cancel()
-    }
-  }, [formData.username])
+  // Use useEffect to check username when it changes
+  // This is commented out to avoid the debounce dependency
+  // useEffect(() => {
+  //   if (formData.username) {
+  //     const timeoutId = setTimeout(() => {
+  //       checkUsernameAvailability(formData.username)
+  //     }, 500)
+  //     return () => clearTimeout(timeoutId)
+  //   }
+  // }, [formData.username])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -79,10 +77,15 @@ const Signup = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }))
+
+    // Check username availability after a delay
+    if (name === "username" && value.length >= 3) {
+      setTimeout(() => checkUsernameAvailability(value), 500)
+    }
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault() 
     setError("")
 
     // Basic validation
@@ -107,7 +110,6 @@ const Signup = () => {
     }
 
     try {
-      // Create signup data
       const signupData = {
         fullName: formData.fullName,
         username: formData.username,
@@ -116,10 +118,14 @@ const Signup = () => {
       }
 
       // Dispatch signup action
-      await dispatch(signupUser(signupData)).unwrap()
-
-      // Redirect to dashboard
-      navigate("/")
+      const resultAction = await dispatch(signupUser(signupData))
+      
+      // Check if the action was fulfilled or rejected
+      if (signupUser.fulfilled.match(resultAction)) {        
+        navigate("/")
+      } else if (signupUser.rejected.match(resultAction)) {
+        setError(resultAction.payload || "An error occurred during registration")
+      }
     } catch (error) {
       console.error("Signup error:", error)
       setError(error.response?.data?.message || "An error occurred during registration. Please try again.")
@@ -130,10 +136,13 @@ const Signup = () => {
     window.location.href = `${API_URL}/auth/${provider}`
   }
 
+  // Display either the local error state or the Redux error
+  const displayError = error || reduxError
+
   return (
     <div className="min-h-screen flex flex-col bg-bg-primary text-text-primary pb-12 pt-12">
       <div className="flex justify-end p-4">
-        <ThemeToggle />
+        {/* ThemeToggle component would be here */}
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4">
@@ -143,9 +152,9 @@ const Signup = () => {
             <p className="text-text-secondary">Join our team collaboration platform</p>
           </div>
 
-          {error && (
-            <div className="bg-danger bg-opacity-10 border border-danger text-danger px-4 py-3 rounded-md mb-4">
-              {error}
+          {displayError && (
+            <div className="bg-danger bg-opacity-10 border border-danger text-white px-4 py-3 rounded-md mb-4">
+              {displayError}
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -309,6 +318,7 @@ const Signup = () => {
                 className="w-full flex items-center justify-center px-4 py-2 border border-border rounded-md shadow-sm text-sm font-medium hover:bg-bg-secondary"
                 onClick={() => handleOAuthSignup("google")}
                 disabled={loading}
+                type="button"
               >
                 <FcGoogle className="h-5 w-5 mr-2" />
                 Google
@@ -317,6 +327,7 @@ const Signup = () => {
                 className="w-full flex items-center justify-center px-4 py-2 border border-border rounded-md shadow-sm text-sm font-medium hover:bg-bg-secondary"
                 onClick={() => handleOAuthSignup("github")}
                 disabled={loading}
+                type="button"
               >
                 <FiGithub className="h-5 w-5 mr-2" />
                 GitHub

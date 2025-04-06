@@ -6,16 +6,14 @@ import { useDispatch, useSelector } from "react-redux"
 import { FiGithub } from "react-icons/fi"
 import { FcGoogle } from "react-icons/fc"
 import { toast } from "react-toastify"
-
 import { loginUser } from "../store/slices/userSlice"
-import ThemeToggle from "../components/ui/ThemeToggle"
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
 
 const Login = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { loading } = useSelector((state) => state.user)
+  const { loading, error: reduxError } = useSelector((state) => state.user)
 
   const [formData, setFormData] = useState({
     email: "",
@@ -33,7 +31,7 @@ const Login = () => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault() // Prevent default form submission
     setError("")
 
     // Basic validation
@@ -43,11 +41,19 @@ const Login = () => {
     }
 
     try {
-      await dispatch(loginUser(formData)).unwrap()
-      toast.success("Login successful!")
-      navigate("/dashboard")
+      // Dispatch login action and get the result
+      const resultAction = await dispatch(loginUser(formData))
+
+      // Check if the action was fulfilled or rejected
+      if (loginUser.fulfilled.match(resultAction)) {
+        toast.success("Login successful!")
+        navigate("/dashboard")
+      } else if (loginUser.rejected.match(resultAction)) {
+        // Set error from the payload
+        setError(resultAction.payload || "Login failed. Please check your credentials.")
+      }
     } catch (error) {
-      setError(error || "Login failed. Please check your credentials.")
+      setError(error?.message || "Login failed. Please check your credentials.")
     }
   }
 
@@ -59,11 +65,12 @@ const Login = () => {
     window.location.href = `${API_URL}/auth/${provider}`
   }
 
+  // Display either the local error state or the Redux error
+  const displayError = error || reduxError
+
   return (
     <div className="min-h-screen flex flex-col bg-bg-primary text-text-primary">
-      <div className="flex justify-end p-4">
-        <ThemeToggle />
-      </div>
+      <div className="flex justify-end p-4">{/* ThemeToggle component would be here */}</div>
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-md">
@@ -72,9 +79,9 @@ const Login = () => {
             <p className="text-text-secondary">Sign in to your account</p>
           </div>
 
-          {error && (
-            <div className="bg-danger bg-opacity-10 border border-danger text-danger px-4 py-3 rounded-md mb-4">
-              {error}
+          {displayError && (
+            <div className="bg-danger bg-opacity-10 border border-danger text-white px-4 py-3 rounded-md mb-4">
+              {displayError}
             </div>
           )}
 
@@ -177,6 +184,7 @@ const Login = () => {
                 className="w-full flex items-center justify-center px-4 py-2 border border-border rounded-md shadow-sm text-sm font-medium hover:bg-bg-secondary"
                 onClick={() => handleOAuthLogin("google")}
                 disabled={loading}
+                type="button"
               >
                 <FcGoogle className="h-5 w-5 mr-2" />
                 Google
@@ -185,6 +193,7 @@ const Login = () => {
                 className="w-full flex items-center justify-center px-4 py-2 border border-border rounded-md shadow-sm text-sm font-medium hover:bg-bg-secondary"
                 onClick={() => handleOAuthLogin("github")}
                 disabled={loading}
+                type="button"
               >
                 <FiGithub className="h-5 w-5 mr-2" />
                 GitHub
@@ -205,3 +214,4 @@ const Login = () => {
 }
 
 export default Login
+

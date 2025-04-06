@@ -40,8 +40,8 @@ app.use(passport.session()) // Add this line to support sessions
 setupPassport()
 
 // Routes
-app.use("/api/admin", userRoutes) // Admin routes
-app.use("/auth", authRoutes) // Auth routes - Fix: use authRoutes instead of userRoutes
+app.use("/api/user", userRoutes)  
+app.use("/auth", authRoutes) 
 
 app.get("/", (req, res) => {
   res.send("Hello, server is running!")

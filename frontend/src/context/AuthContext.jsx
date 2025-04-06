@@ -14,18 +14,15 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
 
       if (token) {
-        try {
-          // Verify token and get user data
+        try {          
           const response = await axios.get(`${API_URL}/auth/me`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           })
-
           setUser(response.data.data[0].user)
         } catch (error) {
-          console.error("Auth initialization error:", error)
-          // Clear invalid token
+          console.error("Auth initialization error:", error)          
           localStorage.removeItem("authToken")
           sessionStorage.removeItem("authToken")
         }
@@ -44,8 +41,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     // Clear token from storage
     localStorage.removeItem("authToken")
-    sessionStorage.removeItem("authToken")
-    // Clear user from state
+    sessionStorage.removeItem("authToken")    
     setUser(null)
   }
 
