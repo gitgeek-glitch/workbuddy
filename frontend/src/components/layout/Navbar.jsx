@@ -190,7 +190,7 @@ const Navbar = () => {
   const UserAvatar = ({ onClick, showIndicator }) => (
     <div className="relative">
       <img
-        src={currentUser?.avatar || "/placeholder.svg?height=32&width=32"}
+        src={currentUser?.avatar || "/public/avatar.png"}
         alt="Profile"
         className="w-8 h-8 rounded-full border-2 border-transparent hover:border-accent transition-colors duration-200"
         onClick={onClick}
@@ -422,9 +422,9 @@ const Navbar = () => {
                 <NavbarLink 
                   to={link.to} 
                   active={isActivePath(link.to)}
-                  onClick={() => dispatch(setMobileMenuOpen(false))}
+                  onClick={() => dispatch(setMobileMenuOpen(false))}                  
                 >
-                  {link.label}
+                  <span className="text-white" >{link.label}</span>
                 </NavbarLink>
               </li>
             ))}
@@ -474,7 +474,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className={`navbar ${scrolled ? "navbar-scrolled" : ""}`}>
+      <nav className={`navbar ${scrolled ? "navbar-scrolled" : ""} pr-12 pl-12`}>
         {/* Mobile menu button (only visible on mobile) */}
         <div className="flex items-center lg:hidden">
           <button 
@@ -497,7 +497,7 @@ const Navbar = () => {
             <div className="flex space-x-1">
               {navigationLinks.map((link) => (
                 <NavbarLink key={link.to} to={link.to} active={isActivePath(link.to)}>
-                  {link.label}
+                  <span className="text-white">{link.label}</span>
                 </NavbarLink>
               ))}
             </div>
@@ -505,26 +505,26 @@ const Navbar = () => {
         </div>
 
         {/* Search moved from center to right side, only for authenticated users */}
-        {isAuthenticated && (
+        {/* {isAuthenticated && (
           <div className="flex-1 flex items-center justify-center px-4 lg:hidden">
             <SearchComponent />
           </div>
-        )}
+        )} */}
 
         {/* Right side items */}
         <div className="flex items-center space-x-2">
           {/* Search now appears before ThemeToggle when authenticated */}
-          {isAuthenticated && (
+          {/* {isAuthenticated && (
             <div className="hidden lg:block">
               <SearchComponent />
             </div>
-          )}
+          )} */}
           
           <ThemeToggle />
 
           {isAuthenticated ? (
             <>
-              <CreateMenuDropdown />
+              {/* <CreateMenuDropdown /> */}
               <NotificationsDropdown />
               <UserDropdown />
             </>

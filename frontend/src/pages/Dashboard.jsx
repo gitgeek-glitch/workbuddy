@@ -20,7 +20,7 @@ const Dashboard = () => {
   const filteredProjects = filter === "all" ? projects : projects.filter((project) => project.status === filter)
 
   return (
-    <div>
+    <div className="container mx-auto pl-8 pr-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <button className="btn-primary flex items-center">

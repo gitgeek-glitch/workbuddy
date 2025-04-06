@@ -98,21 +98,21 @@ export const oauthLogin = createAsyncThunk("user/oauthLogin", async (userData, {
   try {
     console.log("OAuth login data received:", userData)
 
-    // Normalize user data regardless of the OAuth provider
+    // The userData should already be normalized by the OAuthCallback component
+    // Just ensure we have all required fields with fallbacks
     const normalizedUser = {
       id: userData.id || userData.sub || userData._id || `user-${Date.now()}`,
       name: userData.name || userData.fullName || userData.displayName || userData.given_name || "",
       email: userData.email || "",
       avatar: userData.picture || userData.photoURL || userData.avatar || "",
-      provider: userData.provider || "google", // Helps identify OAuth users
+      provider: userData.provider || "oauth",
       role: userData.role || "User",
       bio: userData.bio || "",
-      skills: userData.skills || [],
       joinDate: userData.joinDate || new Date().toLocaleDateString(),
     }
 
     // Handle token
-    const token = userData.credential || userData.token || userData.access_token || `oauth-token-${Date.now()}`
+    const token = userData.token || userData.credential || userData.access_token || `oauth-token-${Date.now()}`
     localStorage.setItem("authToken", token)
 
     console.log("Normalized user data:", normalizedUser)
@@ -133,7 +133,7 @@ export const updateUserProfile = createAsyncThunk("user/updateProfile", async (p
       return rejectWithValue("Authentication required")
     }
 
-    const response = await axios.put(`${API_URL}/users/profile`, profileData, {
+    const response = await axios.patch(`${API_URL}/api/user/profile`, profileData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -47,10 +47,25 @@ const OAuthCallback = () => {
         })
 
         // Get user data
-        const user = response.data.data[0].user
+        const userData = response.data.data[0].user
+
+        // Normalize user data for Redux
+        const normalizedUser = {
+          id: userData.id || userData._id,
+          name: userData.fullName || userData.name || userData.displayName || "",
+          email: userData.email || "",
+          avatar: userData.avatar || userData.picture || userData.photoURL || "",
+          provider: searchParams.get("provider") || "oauth",
+          role: userData.role || "User",
+        }
 
         // Login user with Redux
-        await dispatch(oauthLogin({ token, user })).unwrap()
+        await dispatch(
+          oauthLogin({
+            ...normalizedUser,
+            token,
+          }),
+        ).unwrap()
 
         // Show success message
         navigate("/", {
@@ -96,3 +111,4 @@ const OAuthCallback = () => {
 }
 
 export default OAuthCallback
+
