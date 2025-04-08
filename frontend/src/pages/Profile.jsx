@@ -15,23 +15,25 @@ const Profile = () => {
 
   // Initialize form data based on currentUser
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    role: "",
+    name: "",    
     bio: "",
+    role: "",
+    skills: [],
+    school: ""
   })
 
   // Update formData when currentUser changes
   useEffect(() => {
     if (currentUser) {
       setFormData({
-        name: currentUser.name || currentUser.fullName || currentUser.displayName || "",
-        email: currentUser.email || "",
+        name: currentUser.fullName,        
+        bio: currentUser.bio || "",        
         role: currentUser.role || "",
-        bio: currentUser.bio || ""
+        skills: currentUser.skills || [],        
+        school: currentUser.school || ""
       })
     }
-  }, [currentUser])
+  }, [currentUser])    
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -105,10 +107,10 @@ const Profile = () => {
       </div>
 
       <div className="card mb-6">
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-6 p-5">
           <div className="flex-shrink-0">
             <img
-              src={currentUser?.avatar || currentUser?.picture || currentUser?.photoURL || "/placeholder.svg?height=128&width=128"}
+              src={currentUser?.avatar || "/placeholder.svg?height=128&width=128"}
               alt="Profile"
               className="w-32 h-32 rounded-full object-cover bg-gray-100"
             />
@@ -128,7 +130,7 @@ const Profile = () => {
                     disabled={isSubmitting}
                   />
                 </div>
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium mb-1">Email</label>
                   <input
                     type="email"
@@ -139,7 +141,7 @@ const Profile = () => {
                     disabled={isSubmitting}
                     readOnly={currentUser.provider === "google"} // Make email read-only for OAuth users
                   />
-                </div>
+                </div> */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Role</label>
                   <input
@@ -164,6 +166,30 @@ const Profile = () => {
                   disabled={isSubmitting}
                 ></textarea>
               </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">School</label>
+                <textarea
+                  name="school"
+                  value={formData.school}
+                  onChange={handleChange}
+                  rows={4}
+                  className="input w-full"
+                  disabled={isSubmitting}
+                ></textarea>
+              </div>
+
+              {/* <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Skills</label>
+                <textarea
+                  name="skills"
+                  value={formData.skills.join(", ")}
+                  onChange={handleChange}
+                  rows={4}
+                  className="input w-full"
+                  disabled={isSubmitting}
+                ></textarea>
+              </div> */}
 
               <button type="submit" className="btn-primary flex items-center justify-center" disabled={isSubmitting}>
                 {isSubmitting ? (
@@ -198,7 +224,7 @@ const Profile = () => {
           ) : (
             <div className="flex-1">
               <h2 className="text-xl font-semibold mb-1">
-                {currentUser?.name || currentUser?.fullName || currentUser?.displayName || ""}
+                {currentUser?.fullName}
               </h2>
               <div className="flex items-center text-text-secondary mb-4">
                 <FiMail className="mr-1" />
@@ -220,6 +246,16 @@ const Profile = () => {
                 <h3 className="text-sm font-medium text-text-secondary mb-1">Bio</h3>
                 <p>{currentUser?.bio || "No bio provided yet."}</p>
               </div>
+              
+              <div className="mb-4">
+                <h3 className="text-sm font-medium text-text-secondary mb-1">School</h3>
+                <p>{currentUser?.school || "No School details provided yet."}</p>
+              </div>
+
+              <div className="mb-4">
+                <h3 className="text-sm font-medium text-text-secondary mb-1">Skills</h3>
+                <p>{currentUser?.skills?.join(", ") || "No skills provided yet."}</p>
+              </div>
 
               {currentUser?.skills && currentUser.skills.length > 0 && (
                 <div>
@@ -238,7 +274,7 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="card">
+      {/* <div className="card">
         <h2 className="text-lg font-semibold mb-4">Security</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -256,7 +292,7 @@ const Profile = () => {
             <button className="btn-secondary text-sm">Enable</button>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

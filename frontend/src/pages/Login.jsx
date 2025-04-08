@@ -30,7 +30,8 @@ const Login = () => {
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {    
+    
     e.preventDefault() // Prevent default form submission
     setError("")
 
@@ -45,11 +46,14 @@ const Login = () => {
       const resultAction = await dispatch(loginUser(formData))
 
       // Check if the action was fulfilled or rejected
+      console.log("Hi")
       if (loginUser.fulfilled.match(resultAction)) {
         toast.success("Login successful!")
         navigate("/dashboard")
       } else if (loginUser.rejected.match(resultAction)) {
         // Set error from the payload
+        console.log(resultAction.payload);
+        
         setError(resultAction.payload || "Login failed. Please check your credentials.")
       }
     } catch (error) {

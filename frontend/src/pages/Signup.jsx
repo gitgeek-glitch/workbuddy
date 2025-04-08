@@ -31,7 +31,7 @@ const Signup = () => {
 
   // Create a debounced function for checking username availability
   const checkUsernameAvailability = async (username) => {
-    if (!username || username.length < 3) {
+    if (!username) {
       setUsernameStatus({
         checking: false,
         available: null,

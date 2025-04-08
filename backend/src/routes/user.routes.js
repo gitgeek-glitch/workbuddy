@@ -20,6 +20,9 @@ router.post("/signup", rateLimiter, userSignUp)
 // Login route
 router.post("/signin", userSignIn)
 
+// Profile update route
+router.patch("/profile", userSignIn)
+
 // Google OAuth routes
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }))
 router.get("/google/callback", googleCallback)

@@ -366,7 +366,7 @@ const Navbar = () => {
       <DropdownMenu open={dropdownOpen}>
         <div className="w-56">
           <DropdownHeader 
-            title={currentUser?.name || "User"} 
+            title={currentUser?.fullName || "User"} 
             subtitle={currentUser?.email || "user@example.com"} 
           />
           
@@ -452,7 +452,7 @@ const Navbar = () => {
             <div className="flex items-center px-3 py-2">
               <UserAvatar />
               <div className="ml-3">
-                <p className="text-sm font-medium">{currentUser?.name || "User"}</p>
+                <p className="text-sm font-medium">{currentUser?.fullName || "User"}</p>
                 <p className="text-xs text-text-secondary truncate">{currentUser?.email || "user@example.com"}</p>
               </div>
             </div>

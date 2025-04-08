@@ -91,7 +91,7 @@ const Landing = () => {
       <div
         ref={heroRef}
         data-section="hero"
-        className={`pt-32 pb-20 sm:pt-40 sm:pb-24 relative overflow-hidden transition-all duration-1000 transform ${isVisible.hero ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+        className={`pb-20 sm:pb-24 relative overflow-hidden transition-all duration-1000 transform ${isVisible.hero ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
       >
         {/* Decorative gradient blobs */}
         <div className="absolute top-20 -left-20 w-72 h-72 bg-white opacity-10 rounded-full filter blur-3xl animate-blob"></div>

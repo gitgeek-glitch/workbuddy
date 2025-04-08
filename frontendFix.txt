@@ -1,0 +1,7 @@
+- Add back to home button on login and sign up
+- Let user know that Username len should be min 3 
+- Remove dots from password input field and let user know min 8 len password
+- After signup / login, redirect to dashboard
+- Dashboard responsiveness is not proper
+- In user update, add email change down with change password as the process should include OTP verification
+- When I click on chats, the side pannel is not highlighting the chat like it does for dashboard

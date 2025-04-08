@@ -10,21 +10,23 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: [true, "Username is required"],
+    minlength: [3, "Username should be at least 3 characters"],
     unique: true,
     trim: true,
+    match: [/^[a-zA-Z0-9._]+$/, "Username can only contain letters, numbers, underscores, and dots"],
   },
 
   email: {
     type: String,
     required: [true, "Email is required"],
     unique: true,
-    match: [/\S+@\S+\.\S+/, "Please provide a valid email address"], 
+    match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please provide a valid email address"],
   },
 
   password: {
     type: String,
     required: [true, "Password is required"],
-    minlength: [8, "Password should be at least 8 characters"], 
+    minlength: [8, "Password should be at least 8 characters"],
   },
 
   phone: {

@@ -8,9 +8,22 @@ export const signupUser = createAsyncThunk("user/signup", async (signupData, { r
     const response = await axios.post(`${API_URL}/api/user/signup`, signupData)
     const { token, user } = response.data.data[0]
 
+    // Normalize user data
+    const normalizedUser = {
+      id: user._id || user.id,
+      fullName: user.fullName || user.name,
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar || user.photoURL || "",
+      role: user.role || "User",
+      bio: user.bio || "",
+      joinedDate: user.joinedDate || new Date().toLocaleDateString(),
+      // Include any other fields from user model that you want to use in the frontend
+    }
+
     localStorage.setItem("authToken", token)
 
-    return user
+    return normalizedUser
   } catch (error) {
     // Return the error message from the server
     return rejectWithValue(error.response?.data?.message || "Signup failed. Please try again.")
@@ -31,13 +44,15 @@ export const loginUser = createAsyncThunk("user/login", async (credentials, { re
 
     // Normalize user data
     const normalizedUser = {
-      id: user.id || user._id,
-      name: user.name || user.fullName || user.displayName || "",
-      email: user.email || "",
-      avatar: user.avatar || user.picture || user.photoURL || "",
+      id: user._id || user.id,
+      fullName: user.fullName || user.name,
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar || user.photoURL || "",
       role: user.role || "User",
       bio: user.bio || "",
-      joinDate: user.joinDate || new Date().toLocaleDateString(),
+      joinedDate: user.joinedDate || new Date().toLocaleDateString(),
+      // Include any other fields from user model that you want to use in the frontend
     }
 
     // Store token appropriately
@@ -123,7 +138,6 @@ export const oauthLogin = createAsyncThunk("user/oauthLogin", async (userData, {
   }
 })
 
-// Add a proper implementation for updateUserProfile
 export const updateUserProfile = createAsyncThunk("user/updateProfile", async (profileData, { rejectWithValue }) => {
   try {
     // Get token from storage
@@ -133,13 +147,9 @@ export const updateUserProfile = createAsyncThunk("user/updateProfile", async (p
       return rejectWithValue("Authentication required")
     }
 
-    const response = await axios.patch(`${API_URL}/api/user/profile`, profileData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-
-    return response.data.data
+    // Use the API function to update the profile
+    const response = await updateProfile(profileData)
+    return response
   } catch (error) {
     // If the API call fails, just update the local state
     // This is temporary until your backend is set up
