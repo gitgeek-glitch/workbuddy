@@ -210,7 +210,7 @@ export const userSignIn = async (req, res) => {
 
 export const userProfileUpdate = async (req, res) => {
   try {
-    const userId = req.userId || req.params.id;
+    const userId = req.user._id;
 
     if (!userId) {
       return res.status(400).json({

@@ -51,6 +51,7 @@ export const loginUser = createAsyncThunk("user/login", async (credentials, { re
       avatar: user.avatar || user.photoURL || "",
       role: user.role || "User",
       bio: user.bio || "",
+      school: user.school || "",
       joinedDate: user.joinedDate || new Date().toLocaleDateString(),
       // Include any other fields from user model that you want to use in the frontend
     }
@@ -112,17 +113,19 @@ export const checkAuthState = createAsyncThunk("user/checkAuth", async (_, { rej
 export const oauthLogin = createAsyncThunk("user/oauthLogin", async (userData, { rejectWithValue }) => {
   try {
     console.log("OAuth login data received:", userData)
-
+    console.log(userData);
+    
     // The userData should already be normalized by the OAuthCallback component
     // Just ensure we have all required fields with fallbacks
     const normalizedUser = {
-      id: userData.id || userData.sub || userData._id || `user-${Date.now()}`,
-      name: userData.name || userData.fullName || userData.displayName || userData.given_name || "",
+      id: userData._id,
+      fullName: userData.name,
       email: userData.email || "",
-      avatar: userData.picture || userData.photoURL || userData.avatar || "",
+      avatar: userData.avatar ,
       provider: userData.provider || "oauth",
-      role: userData.role || "User",
+      role:  "",
       bio: userData.bio || "",
+      school: userData.school || "",
       joinDate: userData.joinDate || new Date().toLocaleDateString(),
     }
 
@@ -147,9 +150,35 @@ export const updateUserProfile = createAsyncThunk("user/updateProfile", async (p
       return rejectWithValue("Authentication required")
     }
 
+    const response = await axios.patch(`${API_URL}/api/user/profile`, profileData, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    console.log(response);
+    
+
+    const { user } = response.data.data[0];
+
+    console.log("Login response user data:", user)
+
+    // Normalize user data
+    const normalizedUser = {
+      id: user._id || user.id,
+      fullName: user.fullName || user.name,
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar || user.photoURL || "",
+      role: user.role || "User",
+      bio: user.bio || "",
+      school: user.school || "",
+      joinedDate: user.joinedDate || new Date().toLocaleDateString(),
+      // Include any other fields from user model that you want to use in the frontend
+    }
+
     // Use the API function to update the profile
-    const response = await updateProfile(profileData)
-    return response
+    return normalizedUser;
   } catch (error) {
     // If the API call fails, just update the local state
     // This is temporary until your backend is set up

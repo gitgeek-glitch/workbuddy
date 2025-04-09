@@ -5,9 +5,11 @@ import {
   checkUsername,
   googleCallback,
   githubCallback,
+  userProfileUpdate,
 } from "../controllers/user.controller.js"
 import { rateLimiter } from "../middlewares/rate.middleware.js"
 import passport from "passport"
+import { authenticateJWT } from "../middlewares/auth.middleware.js"
 
 const router = express.Router()
 
@@ -21,7 +23,7 @@ router.post("/signup", rateLimiter, userSignUp)
 router.post("/signin", userSignIn)
 
 // Profile update route
-router.patch("/profile", userSignIn)
+router.patch("/profile", authenticateJWT, userProfileUpdate)
 
 // Google OAuth routes
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }))

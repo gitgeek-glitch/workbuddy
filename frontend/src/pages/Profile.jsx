@@ -15,7 +15,7 @@ const Profile = () => {
 
   // Initialize form data based on currentUser
   const [formData, setFormData] = useState({
-    name: "",    
+    fullName: "",    
     bio: "",
     role: "",
     skills: [],
@@ -26,7 +26,7 @@ const Profile = () => {
   useEffect(() => {
     if (currentUser) {
       setFormData({
-        name: currentUser.fullName,        
+        fullName: currentUser.fullName,        
         bio: currentUser.bio || "",        
         role: currentUser.role || "",
         skills: currentUser.skills || [],        
@@ -123,25 +123,14 @@ const Profile = () => {
                   <label className="block text-sm font-medium mb-1">Name</label>
                   <input
                     type="text"
-                    name="name"
-                    value={formData.name}
+                    name="fullName"
+                    value={formData.fullName}
                     onChange={handleChange}
                     className="input w-full"
                     disabled={isSubmitting}
                   />
                 </div>
-                {/* <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="input w-full"
-                    disabled={isSubmitting}
-                    readOnly={currentUser.provider === "google"} // Make email read-only for OAuth users
-                  />
-                </div> */}
+
                 <div>
                   <label className="block text-sm font-medium mb-1">Role</label>
                   <input
@@ -252,10 +241,10 @@ const Profile = () => {
                 <p>{currentUser?.school || "No School details provided yet."}</p>
               </div>
 
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <h3 className="text-sm font-medium text-text-secondary mb-1">Skills</h3>
                 <p>{currentUser?.skills?.join(", ") || "No skills provided yet."}</p>
-              </div>
+              </div> */}
 
               {currentUser?.skills && currentUser.skills.length > 0 && (
                 <div>
@@ -274,9 +263,16 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* <div className="card">
+      <div className="card">
         <h2 className="text-lg font-semibold mb-4">Security</h2>
         <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <FiLock className="mr-2" />
+              <span>Email</span>
+            </div>
+            <button className="btn-secondary text-sm">Change Email</button>
+          </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <FiLock className="mr-2" />
@@ -292,7 +288,7 @@ const Profile = () => {
             <button className="btn-secondary text-sm">Enable</button>
           </div>
         </div>
-      </div> */}
+      </div>
     </div>
   )
 }
