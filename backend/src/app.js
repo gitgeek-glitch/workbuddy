@@ -5,6 +5,7 @@ import passport from "passport"
 import session from "express-session"
 import userRoutes from "./routes/user.routes.js"
 import authRoutes from "./routes/auth.routes.js"
+import projectRoutes from "./routes/project.routes.js"
 import setupPassport from "./config/passport.js"
 
 // Load environment variables
@@ -40,8 +41,9 @@ app.use(passport.session()) // Add this line to support sessions
 setupPassport()
 
 // Routes
-app.use("/api/user", userRoutes)  
-app.use("/auth", authRoutes) 
+app.use("/auth", authRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/project", projectRoutes); 
 
 app.get("/", (req, res) => {
   res.send("Hello, server is running!")

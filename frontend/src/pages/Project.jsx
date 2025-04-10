@@ -4,12 +4,14 @@ import { useState } from "react"
 import { useSelector } from "react-redux"
 import { FiPlus, FiFilter, FiSearch, FiClock, FiCheck } from "react-icons/fi"
 import ProjectCard from "../components/projects/ProjectCard"
+import NewProjectForm from "../components/projects/NewProjectForm"
 
 const Project = () => {
   const { projects, loading, error } = useSelector((state) => state.projects)
   const [filter, setFilter] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("ongoing") // Default to ongoing projects
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false)
 
   if (loading) {
     return (
@@ -64,7 +66,7 @@ const Project = () => {
     <div className="container mx-auto px-4 py-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold">Projects</h1>
-        <button className="btn-primary flex items-center">
+        <button className="btn-primary flex items-center" onClick={() => setShowNewProjectModal(true)}>
           <FiPlus className="mr-1" /> New Project
         </button>
       </div>
@@ -139,7 +141,7 @@ const Project = () => {
                 : "Complete a project to see it here"}
           </p>
           {activeTab === "ongoing" && (
-            <button className="btn-primary inline-flex items-center">
+            <button className="btn-primary inline-flex items-center" onClick={() => setShowNewProjectModal(true)}>
               <FiPlus className="mr-1" /> Create Project
             </button>
           )}
@@ -149,6 +151,15 @@ const Project = () => {
           {filteredProjects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
+        </div>
+      )}
+
+      {/* New Project Modal */}
+      {showNewProjectModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <NewProjectForm onClose={() => setShowNewProjectModal(false)} />
+          </div>
         </div>
       )}
     </div>

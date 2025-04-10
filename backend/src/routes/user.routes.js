@@ -6,6 +6,7 @@ import {
   googleCallback,
   githubCallback,
   userProfileUpdate,
+  searchUsers,
 } from "../controllers/user.controller.js"
 import { rateLimiter } from "../middlewares/rate.middleware.js"
 import passport from "passport"
@@ -15,6 +16,9 @@ const router = express.Router()
 
 // Check username availability
 router.get("/check-username", checkUsername)
+
+// Search users
+router.get("/search", authenticateJWT, searchUsers)
 
 // Apply rate limit to registration route
 router.post("/signup", rateLimiter, userSignUp)
@@ -34,4 +38,3 @@ router.get("/github", passport.authenticate("github", { scope: ["user:email"] })
 router.get("/github/callback", githubCallback)
 
 export default router
-
