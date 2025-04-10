@@ -505,7 +505,7 @@ select:focus {
 }
 
 /* Animation for delete and finish buttons */
-@keyframes fadeIn {
+/* @keyframes fadeIn {
   from {
     opacity: 0;
     transform: scale(0.9);
@@ -518,10 +518,10 @@ select:focus {
 
 .action-button {
   animation: fadeIn 0.2s ease-out;
-}
+} */
 
 /* Calendar customization */
-.react-datepicker {
+/* .react-datepicker {
   @apply border border-border bg-bg-primary shadow-lg rounded-md !important;
 }
 
@@ -539,20 +539,20 @@ select:focus {
 
 .react-datepicker__day--keyboard-selected {
   @apply bg-accent bg-opacity-20 !important;
-}
+} */
 
 /* Deadline styling */
-.deadline-soon {
+/* .deadline-soon {
   @apply text-danger font-medium;
-}
+} */
 
 /* Project card action buttons */
-.project-action-buttons {
+/* .project-action-buttons {
   @apply opacity-0 group-hover:opacity-100 transition-opacity duration-200;
-}
+} */
 
 /* Form step transitions */
-.form-step {
+/* .form-step {
   @apply transition-all duration-300 ease-in-out;
 }
 
@@ -582,7 +582,7 @@ select:focus {
 
 .project-tab-inactive {
   @apply border-transparent hover:text-accent;
-}
+} */
 
 
 /* Scrollbar styling */
