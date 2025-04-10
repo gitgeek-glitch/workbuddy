@@ -69,13 +69,13 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Logo and navigation - always left aligned */}
+          {/* Logo and navigation */}
           <div className="flex items-center">
-            {/* Sidebar toggle button (visible only on dashboard routes when authenticated) */}
+            {/* Sidebar toggle button (visible only on desktop AND on dashboard routes when authenticated) */}
             {isAuthenticated && isDashboardRoute() && (
               <button
                 onClick={() => dispatch(toggleSidebar())}
-                className="p-2 mr-4 rounded-full bg-bg-primary/80 hover:bg-bg-primary text-text-secondary hover:text-accent transition-all duration-300 ease-in-out transform hover:scale-105"
+                className="hidden lg:flex p-2 mr-4 rounded-full bg-bg-primary/80 hover:bg-bg-primary text-text-secondary hover:text-accent transition-all duration-300 ease-in-out transform hover:scale-105"
                 aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
                 <FiChevronLeft
@@ -85,6 +85,7 @@ const Navbar = () => {
               </button>
             )}
 
+            {/* Logo - always visible */}
             <Link to="/" className="flex items-center space-x-2 mr-8">
               <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white font-bold">
                 TC
