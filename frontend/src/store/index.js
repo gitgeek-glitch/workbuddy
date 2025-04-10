@@ -3,6 +3,7 @@ import userReducer from "./slices/userSlice"
 import projectReducer from "./slices/projectSlice"
 import themeReducer from "./slices/themeSlice"
 import uiReducer from "./slices/uiSlice"
+import notificationReducer from "./slices/notificationSlice" // 👈 Add this
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     projects: projectReducer,
     theme: themeReducer,
     ui: uiReducer,
+    notifications: notificationReducer, // 👈 And this line
   },
 })
 

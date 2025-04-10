@@ -6,6 +6,7 @@ import session from "express-session"
 import userRoutes from "./routes/user.routes.js"
 import authRoutes from "./routes/auth.routes.js"
 import projectRoutes from "./routes/project.routes.js"
+import notificationRoutes from "./routes/notification.routes.js"
 import setupPassport from "./config/passport.js"
 
 // Load environment variables
@@ -17,7 +18,7 @@ const app = express()
 app.use(express.json())
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: process.env.CLIENT_URL,
     credentials: true,
   }),
 )
@@ -41,9 +42,10 @@ app.use(passport.session()) // Add this line to support sessions
 setupPassport()
 
 // Routes
-app.use("/auth", authRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/project", projectRoutes); 
+app.use("/auth", authRoutes)
+app.use("/api/user", userRoutes)
+app.use("/api/project", projectRoutes)
+app.use("/api/notifications", notificationRoutes)
 
 app.get("/", (req, res) => {
   res.send("Hello, server is running!")
@@ -59,5 +61,4 @@ app.use((err, req, res, next) => {
   })
 })
 
-export default app;
-
+export default app

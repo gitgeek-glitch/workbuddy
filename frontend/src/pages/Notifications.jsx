@@ -1,87 +1,22 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { FiGitPullRequest, FiStar, FiGitCommit, FiMessageSquare, FiUser, FiCalendar, FiBell } from "react-icons/fi"
-import { markAllNotificationsAsRead, markNotificationAsRead } from "../store/slices/uiSlice"
+import { FiBell } from "react-icons/fi"
+import { fetchNotifications, markNotificationRead, markAllNotificationsRead } from "../store/slices/notificationSlice"
 
 const Notifications = () => {
   const dispatch = useDispatch()
-  const { notifications, unreadNotificationsCount } = useSelector((state) => state.ui)
+  const { notifications, unreadCount, loading } = useSelector((state) => state.notifications)
   const [filter, setFilter] = useState("all") // all, unread, read
 
-  // Mock notifications since we don't have real ones yet
-  const mockNotifications = [
-    {
-      id: 1,
-      title: "New comment on your pull request",
-      message: "John Doe commented on your PR #123",
-      time: "5 minutes ago",
-      read: false,
-      type: "pull-request",
-      icon: <FiGitPullRequest />,
-    },
-    {
-      id: 2,
-      title: "Your project was starred",
-      message: "Alice Williams starred your project",
-      time: "1 hour ago",
-      read: false,
-      type: "star",
-      icon: <FiStar />,
-    },
-    {
-      id: 3,
-      title: "New pull request",
-      message: "Bob Johnson opened PR #124",
-      time: "3 hours ago",
-      read: true,
-      type: "pull-request",
-      icon: <FiGitPullRequest />,
-    },
-    {
-      id: 4,
-      title: "New commit pushed",
-      message: "Emma Davis pushed 3 commits to main branch",
-      time: "5 hours ago",
-      read: true,
-      type: "commit",
-      icon: <FiGitCommit />,
-    },
-    {
-      id: 5,
-      title: "New message in chat",
-      message: "You have a new message from Charlie Brown",
-      time: "1 day ago",
-      read: true,
-      type: "message",
-      icon: <FiMessageSquare />,
-    },
-    {
-      id: 6,
-      title: "Team member added",
-      message: "Grace Taylor was added to your project",
-      time: "2 days ago",
-      read: true,
-      type: "team",
-      icon: <FiUser />,
-    },
-    {
-      id: 7,
-      title: "Project deadline approaching",
-      message: "E-commerce Dashboard project is due in 3 days",
-      time: "2 days ago",
-      read: false,
-      type: "deadline",
-      icon: <FiCalendar />,
-    },
-  ]
-
-  // Use mock notifications until we implement real ones
-  const displayNotifications = notifications.length > 0 ? notifications : mockNotifications
+  // Fetch notifications on component mount
+  useEffect(() => {
+    dispatch(fetchNotifications())
+  }, [dispatch])
 
   // Filter notifications based on read status
-  const filteredNotifications = displayNotifications.filter((notification) => {
+  const filteredNotifications = notifications.filter((notification) => {
     if (filter === "all") return true
     if (filter === "unread") return !notification.read
     if (filter === "read") return notification.read
@@ -89,13 +24,122 @@ const Notifications = () => {
   })
 
   // Mark a notification as read
-  const handleMarkAsRead = (id) => {
-    dispatch(markNotificationAsRead(id))
+  const handleMarkAsRead = (notificationId) => {
+    dispatch(markNotificationRead(notificationId))
   }
 
   // Mark all notifications as read
   const handleMarkAllAsRead = () => {
-    dispatch(markAllNotificationsAsRead())
+    dispatch(markAllNotificationsRead())
+  }
+
+  // Format notification time
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffMs = now - date
+    const diffSec = Math.floor(diffMs / 1000)
+    const diffMin = Math.floor(diffSec / 60)
+    const diffHour = Math.floor(diffMin / 60)
+    const diffDay = Math.floor(diffHour / 24)
+
+    if (diffSec < 60) return "just now"
+    if (diffMin < 60) return `${diffMin} minute${diffMin > 1 ? "s" : ""} ago`
+    if (diffHour < 24) return `${diffHour} hour${diffHour > 1 ? "s" : ""} ago`
+    if (diffDay < 7) return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`
+
+    return date.toLocaleDateString()
+  }
+
+  // Get icon based on notification type
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case "Invitation":
+        return (
+          <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+        )
+      case "File-Status":
+        return (
+          <div className="w-10 h-10 rounded-full bg-green-100 text-green-500 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+        )
+      case "Message":
+        return (
+          <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-500 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+        )
+      case "Role-Change":
+        return (
+          <div className="w-10 h-10 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+        )
+      default:
+        return (
+          <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
+            <FiBell size={20} />
+          </div>
+        )
+    }
   }
 
   return (
@@ -104,16 +148,12 @@ const Notifications = () => {
         <div>
           <h1 className="text-2xl font-bold">Notifications</h1>
           <p className="text-text-secondary">
-            {unreadNotificationsCount > 0
-              ? `You have ${unreadNotificationsCount} unread notifications`
+            {unreadCount > 0
+              ? `You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`
               : "You're all caught up!"}
           </p>
         </div>
-        <button
-          onClick={handleMarkAllAsRead}
-          className="btn-secondary flex items-center"
-          disabled={unreadNotificationsCount === 0}
-        >
+        <button onClick={handleMarkAllAsRead} className="btn-secondary flex items-center" disabled={unreadCount === 0}>
           <FiBell className="mr-1" /> Mark all as read
         </button>
       </div>
@@ -148,7 +188,12 @@ const Notifications = () => {
 
       {/* Notifications list */}
       <div className="bg-bg-secondary border border-border rounded-lg overflow-hidden">
-        {filteredNotifications.length === 0 ? (
+        {loading ? (
+          <div className="p-8 text-center">
+            <div className="animate-spin w-8 h-8 border-2 border-accent border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p>Loading notifications...</p>
+          </div>
+        ) : filteredNotifications.length === 0 ? (
           <div className="p-8 text-center">
             <div className="w-16 h-16 bg-bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <FiBell className="text-text-secondary" size={24} />
@@ -166,34 +211,30 @@ const Notifications = () => {
           <div className="divide-y divide-border">
             {filteredNotifications.map((notification) => (
               <div
-                key={notification.id}
+                key={notification._id}
                 className={`p-4 hover:bg-bg-primary transition-colors ${notification.read ? "opacity-70" : ""}`}
-                onClick={() => !notification.read && handleMarkAsRead(notification.id)}
+                onClick={() => !notification.read && handleMarkAsRead(notification._id)}
               >
                 <div className="flex">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        notification.read ? "bg-bg-primary text-text-secondary" : "bg-accent bg-opacity-10 text-accent"
-                      }`}
-                    >
-                      {notification.icon}
-                    </div>
-                  </div>
+                  <div className="flex-shrink-0 mt-0.5">{getNotificationIcon(notification.type)}</div>
                   <div className="ml-4 flex-1">
                     <div className="flex justify-between">
                       <p className={`text-sm font-medium ${!notification.read ? "text-accent" : ""}`}>
-                        {notification.title}
+                        {notification.message}
                       </p>
-                      <p className="text-xs text-text-secondary">{notification.time}</p>
+                      <p className="text-xs text-text-secondary">{formatTime(notification.createdAt)}</p>
                     </div>
-                    <p className="text-sm text-text-secondary mt-1">{notification.message}</p>
+                    {notification.projectId && (
+                      <p className="text-sm text-text-secondary mt-1">
+                        Project: {notification.projectId.name || notification.projectId}
+                      </p>
+                    )}
                     {!notification.read && (
                       <button
                         className="text-xs text-accent hover:underline mt-2"
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleMarkAsRead(notification.id)
+                          handleMarkAsRead(notification._id)
                         }}
                       >
                         Mark as read

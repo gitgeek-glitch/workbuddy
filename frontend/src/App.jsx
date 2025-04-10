@@ -10,6 +10,8 @@ import store from "./store"
 import { checkAuthState } from "./store/slices/userSlice"
 import { getProjects } from "./store/slices/projectSlice"
 import { setTheme } from "./store/slices/themeSlice"
+import { fetchNotifications } from "./store/slices/notificationSlice"
+import { initializeSocket, requestNotificationPermission, disconnectSocket } from "./services/socketService"
 
 import Layout from "./components/layout/Layout"
 import Landing from "./pages/Landing"
@@ -29,19 +31,39 @@ import { ProjectProvider } from "./context/ProjectContext"
 // Wrapper component that handles auth state and provides context
 const AppContent = () => {
   const dispatch = useDispatch()
-  const { isAuthenticated, loading: userLoading } = useSelector((state) => state.user)
+  const { isAuthenticated, loading: userLoading, currentUser, token } = useSelector((state) => state.user)
   const { darkMode } = useSelector((state) => state.theme)
 
   useEffect(() => {
     // Check if user is authenticated
     dispatch(checkAuthState())
 
-    // Load projects
-    dispatch(getProjects())
+    // Request notification permission
+    requestNotificationPermission()
+  }, [dispatch])
 
+  useEffect(() => {
+    // Initialize socket connection when user is authenticated
+    if (isAuthenticated && token) {
+      initializeSocket(token, store)
+
+      // Load projects and notifications
+      dispatch(getProjects())
+      dispatch(fetchNotifications())
+    }
+
+    // Cleanup socket connection on unmount
+    return () => {
+      if (isAuthenticated) {
+        disconnectSocket()
+      }
+    }
+  }, [isAuthenticated, token, dispatch])
+
+  useEffect(() => {
     // Apply theme
     dispatch(setTheme(darkMode ? "dark" : "light"))
-  }, [dispatch, darkMode])
+  }, [darkMode, dispatch])
 
   if (userLoading) {
     return <LoadingScreen />

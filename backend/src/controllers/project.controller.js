@@ -1,6 +1,6 @@
 import { Project } from "../models/project.model.js"
 import { User } from "../models/user.model.js"
-import { Notification } from "../models/notification.model.js"
+import { createNotification } from "./notification.controller.js"
 import winston from "winston"
 
 const logger = winston.createLogger({
@@ -59,14 +59,17 @@ export const createProject = async (req, res) => {
           newProject.invitations.push(user._id)
 
           // Create notification for the invited user
-          const notification = new Notification({
-            user: user._id,
-            message: `You have been invited to join the project "${name}"`,
-            projectId: newProject._id,
-            type: "Invitation",
-          })
+          const notification = await createNotification(
+            user._id,
+            `You have been invited to join the project "${name}"`,
+            newProject._id,
+            "Invitation",
+          )
 
-          await notification.save()
+          // Send real-time notification if user is online
+          if (notification && global.io && global.userSocketMap) {
+            global.sendNotificationToUser(global.io, global.userSocketMap, user._id, notification)
+          }
         }
       }
 
@@ -128,6 +131,23 @@ export const updateProject = async (req, res) => {
     if (updateData.important !== undefined) project.important = updateData.important
 
     await project.save()
+
+    // Notify all project members about the update
+    for (const member of project.members) {
+      if (!member.userId.equals(userId)) {
+        const notification = await createNotification(
+          member.userId,
+          `Project "${project.name}" has been updated`,
+          project._id,
+          "File-Status",
+        )
+
+        // Send real-time notification
+        if (notification && global.io && global.userSocketMap) {
+          global.sendNotificationToUser(global.io, global.userSocketMap, member.userId, notification)
+        }
+      }
+    }
 
     logger.info(`${new Date().toISOString()} - Success: Project ${projectId} updated`)
 
@@ -197,14 +217,17 @@ export const acceptInvitation = async (req, res) => {
     // Create notification for project leader
     const leader = project.members.find((member) => member.role === "Leader")
     if (leader) {
-      const notification = new Notification({
-        user: leader.userId,
-        message: `User ${req.user.username} has joined your project "${project.name}"`,
-        projectId: project._id,
-        type: "Invitation",
-      })
+      const notification = await createNotification(
+        leader.userId,
+        `User ${req.user.username} has joined your project "${project.name}"`,
+        project._id,
+        "Invitation",
+      )
 
-      await notification.save()
+      // Send real-time notification
+      if (notification && global.io && global.userSocketMap) {
+        global.sendNotificationToUser(global.io, global.userSocketMap, leader.userId, notification)
+      }
     }
 
     logger.info(`${new Date().toISOString()} - Success: User ${userId} joined project ${projectId}`)
@@ -257,11 +280,27 @@ export const declineInvitation = async (req, res) => {
 
     await project.save()
 
+    // Create notification for project leader
+    const leader = project.members.find((member) => member.role === "Leader")
+    if (leader) {
+      const notification = await createNotification(
+        leader.userId,
+        `User ${req.user.username} has declined the invitation to join project "${project.name}"`,
+        project._id,
+        "Invitation",
+      )
+
+      // Send real-time notification
+      if (notification && global.io && global.userSocketMap) {
+        global.sendNotificationToUser(global.io, global.userSocketMap, leader.userId, notification)
+      }
+    }
+
     logger.info(`${new Date().toISOString()} - Success: User ${userId} declined invitation to project ${projectId}`)
 
     return res.status(200).json({
       message: "Successfully declined the invitation",
-      data: [],
+      data: [project],
       code: 200,
     })
   } catch (error) {
@@ -338,14 +377,17 @@ export const changeMemberRole = async (req, res) => {
     await project.save()
 
     // Create notification for the member
-    const notification = new Notification({
-      user: memberId,
-      message: `Your role in project "${project.name}" has been changed from ${oldRole} to ${role}`,
-      projectId: project._id,
-      type: "Role-Change",
-    })
+    const notification = await createNotification(
+      memberId,
+      `Your role in project "${project.name}" has been changed from ${oldRole} to ${role}`,
+      project._id,
+      "Role-Change",
+    )
 
-    await notification.save()
+    // Send real-time notification
+    if (notification && global.io && global.userSocketMap) {
+      global.sendNotificationToUser(global.io, global.userSocketMap, memberId, notification)
+    }
 
     logger.info(
       `${new Date().toISOString()} - Success: Member ${memberId} role changed to ${role} in project ${projectId}`,
@@ -428,14 +470,17 @@ export const removeMember = async (req, res) => {
     await project.save()
 
     // Create notification for the removed member
-    const notification = new Notification({
-      user: memberId,
-      message: `You have been removed from project "${project.name}"`,
-      projectId: project._id,
-      type: "Role-Change",
-    })
+    const notification = await createNotification(
+      memberId,
+      `You have been removed from project "${project.name}"`,
+      project._id,
+      "Role-Change",
+    )
 
-    await notification.save()
+    // Send real-time notification
+    if (notification && global.io && global.userSocketMap) {
+      global.sendNotificationToUser(global.io, global.userSocketMap, memberId, notification)
+    }
 
     logger.info(`${new Date().toISOString()} - Success: Member ${memberId} removed from project ${projectId}`)
 
@@ -611,14 +656,17 @@ export const inviteMembers = async (req, res) => {
           newInvitations.push(user._id)
 
           // Create notification for the invited user
-          const notification = new Notification({
-            user: user._id,
-            message: `You have been invited to join the project "${project.name}"`,
-            projectId: project._id,
-            type: "Invitation",
-          })
+          const notification = await createNotification(
+            user._id,
+            `You have been invited to join the project "${project.name}"`,
+            project._id,
+            "Invitation",
+          )
 
-          await notification.save()
+          // Send real-time notification
+          if (notification && global.io && global.userSocketMap) {
+            global.sendNotificationToUser(global.io, global.userSocketMap, user._id, notification)
+          }
         }
       }
     }
