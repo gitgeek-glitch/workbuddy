@@ -5,6 +5,8 @@ const mockProjects = [
     name: "Team Collaboration Platform",
     description: "A platform for teams to collaborate on projects, share files, and communicate in real-time.",
     status: "active",
+    important: true,
+    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
     pullRequests: 5,
     commits: 128,
     members: 8,
@@ -22,6 +24,8 @@ const mockProjects = [
     name: "E-commerce Dashboard",
     description: "Admin dashboard for managing products, orders, and customers for an e-commerce platform.",
     status: "active",
+    important: false,
+    deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
     pullRequests: 3,
     commits: 87,
     members: 4,
@@ -38,6 +42,8 @@ const mockProjects = [
     name: "Mobile App Backend",
     description: "RESTful API for a mobile application with authentication, file uploads, and real-time notifications.",
     status: "active",
+    important: true,
+    deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
     pullRequests: 2,
     commits: 64,
     members: 3,
@@ -52,7 +58,9 @@ const mockProjects = [
     id: "4",
     name: "Analytics Dashboard",
     description: "Data visualization dashboard for tracking user engagement and business metrics.",
-    status: "archived",
+    status: "active",
+    important: false,
+    deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days from now
     pullRequests: 0,
     commits: 42,
     members: 2,
@@ -67,6 +75,8 @@ const mockProjects = [
     name: "Customer Portal",
     description: "A portal for customers to manage their accounts, view orders, and get support.",
     status: "finished",
+    important: false,
+    deadline: null, // No deadline for finished projects
     pullRequests: 7,
     commits: 156,
     members: 5,
@@ -84,6 +94,8 @@ const mockProjects = [
     name: "Inventory Management System",
     description: "System for tracking inventory levels, orders, sales, and deliveries for a retail business.",
     status: "finished",
+    important: true,
+    deadline: null, // No deadline for finished projects
     pullRequests: 4,
     commits: 98,
     members: 3,
@@ -127,6 +139,7 @@ export const createProject = (projectData) => {
         pullRequests: 0,
         commits: 0,
         status: projectData.status || "active", // Default to active if not specified
+        important: projectData.important || false, // Default to not important
       }
       resolve(newProject)
     }, 500)
