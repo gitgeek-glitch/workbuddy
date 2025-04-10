@@ -3,20 +3,9 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
-import {
-  FiHome,
-  FiFolder,
-  FiMessageSquare,
-  FiUsers,
-  FiSettings,
-  FiChevronDown,
-  FiChevronRight,
-  FiStar,
-  FiGitCommit,
-  FiChevronLeft,
-} from "react-icons/fi"
+import { FiHome, FiFolder, FiMessageSquare, FiUsers, FiSettings } from "react-icons/fi"
 
-import { toggleSidebar, setSidebarCollapsed } from "../../store/slices/uiSlice"
+import { setSidebarCollapsed } from "../../store/slices/uiSlice"
 import { starProject, unstarProject, addToRecent } from "../../store/slices/projectSlice"
 
 const Sidebar = () => {
@@ -89,15 +78,7 @@ const Sidebar = () => {
       } z-10`}
     >
       <div className="sidebar-header px-4 h-16 flex items-center justify-between border-b border-border/20">
-        <button
-          onClick={() => dispatch(toggleSidebar())}
-          className={`p-2 rounded-full bg-bg-primary/80 hover:bg-bg-primary text-text-secondary hover:text-accent transition-all duration-300 ease-in-out transform hover:scale-105 ${
-            sidebarCollapsed ? "rotate-180" : ""
-          }`}
-          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <FiChevronLeft size={16} />
-        </button>
+        {/* Empty header - toggle button moved to navbar */}
       </div>
 
       <nav

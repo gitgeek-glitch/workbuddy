@@ -19,7 +19,7 @@ const MobileNavigation = () => {
   const NavLink = ({ to, children }) => (
     <Link
       to={to}
-      className="block px-4 py-2 text-base font-medium hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+      className="block px-4 py-2 text-base font-medium hover:bg-bg-primary text-text-primary rounded-md"
       onClick={() => dispatch(setMobileMenuOpen(false))}
     >
       {children}
@@ -33,11 +33,11 @@ const MobileNavigation = () => {
       }`}
     >
       <div
-        className={`bg-white dark:bg-gray-800 w-64 h-full overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+        className={`bg-bg-secondary w-64 h-full overflow-y-auto transform transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white font-bold">
               TC
@@ -45,7 +45,7 @@ const MobileNavigation = () => {
             <span className="font-bold text-lg">TeamCollab</span>
           </div>
           <button
-            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 rounded-md hover:bg-bg-primary text-text-primary"
             onClick={() => dispatch(setMobileMenuOpen(false))}
           >
             <FiX size={20} />
@@ -71,20 +71,18 @@ const MobileNavigation = () => {
             </li>
           </ul>
 
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-6 pt-6 border-t border-border">
             <div className="flex items-center px-3 py-2">
               <img src={currentUser?.avatar || "/avatar.png"} alt="Profile" className="w-8 h-8 rounded-full" />
               <div className="ml-3">
-                <p className="text-sm font-medium">{currentUser?.fullName || "User"}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {currentUser?.email || "user@example.com"}
-                </p>
+                <p className="text-sm font-medium text-text-primary">{currentUser?.fullName || "User"}</p>
+                <p className="text-xs text-text-secondary truncate">{currentUser?.email || "user@example.com"}</p>
               </div>
             </div>
 
             <button
               onClick={handleLogout}
-              className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md mt-2"
+              className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-bg-primary rounded-md mt-2"
             >
               Sign out
             </button>

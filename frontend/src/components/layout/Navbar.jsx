@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
-import { FiMenu } from "react-icons/fi"
-import { setMobileMenuOpen } from "../../store/slices/uiSlice"
+import { FiMenu, FiChevronLeft } from "react-icons/fi"
+import { setMobileMenuOpen, toggleSidebar } from "../../store/slices/uiSlice"
 import ThemeToggle from "../ui/ThemeToggle"
 import NotificationBell from "../NotificationBell"
 import UserDropdown from "./UserDropdown"
@@ -14,6 +14,7 @@ const Navbar = () => {
   const dispatch = useDispatch()
   const location = useLocation()
   const { isAuthenticated } = useSelector((state) => state.user)
+  const { sidebarCollapsed } = useSelector((state) => state.ui)
   const [scrolled, setScrolled] = useState(false)
 
   // Handle scroll effect
@@ -32,6 +33,16 @@ const Navbar = () => {
     return location.pathname.includes(path)
   }
 
+  // Check if current route is a dashboard route
+  const isDashboardRoute = () => {
+    return (
+      location.pathname.includes("/dashboard") ||
+      location.pathname.includes("/projects") ||
+      location.pathname.includes("/team") ||
+      location.pathname.includes("/profile")
+    )
+  }
+
   // Navigation links
   const navigationLinks = [
     { to: "/dashboard", label: "Dashboard" },
@@ -42,7 +53,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-10 bg-white dark:bg-gray-800 shadow-sm transition-all duration-200 ${
+        className={`fixed top-0 left-0 right-0 z-10 bg-bg-secondary border-b border-border/30 transition-all duration-200 ${
           scrolled ? "py-2" : "py-3"
         } px-4 md:px-6 lg:px-12`}
       >
@@ -50,7 +61,7 @@ const Navbar = () => {
           {/* Mobile menu button (only visible on mobile) */}
           <div className="flex items-center lg:hidden">
             <button
-              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="p-2 rounded-md hover:bg-bg-primary/80 text-text-primary"
               onClick={() => dispatch(setMobileMenuOpen(true))}
               aria-label="Toggle mobile menu"
             >
@@ -58,8 +69,22 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Logo and navigation */}
-          <div className="hidden lg:flex items-center">
+          {/* Logo and navigation - always left aligned */}
+          <div className="flex items-center">
+            {/* Sidebar toggle button (visible only on dashboard routes when authenticated) */}
+            {isAuthenticated && isDashboardRoute() && (
+              <button
+                onClick={() => dispatch(toggleSidebar())}
+                className="p-2 mr-4 rounded-full bg-bg-primary/80 hover:bg-bg-primary text-text-secondary hover:text-accent transition-all duration-300 ease-in-out transform hover:scale-105"
+                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                <FiChevronLeft
+                  size={16}
+                  className={`transition-transform duration-300 ${sidebarCollapsed ? "rotate-180" : ""}`}
+                />
+              </button>
+            )}
+
             <Link to="/" className="flex items-center space-x-2 mr-8">
               <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white font-bold">
                 TC
@@ -69,15 +94,15 @@ const Navbar = () => {
 
             {/* Desktop navigation */}
             {isAuthenticated && (
-              <div className="flex space-x-1">
+              <div className="hidden lg:flex space-x-1">
                 {navigationLinks.map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
                     className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       isActivePath(link.to)
-                        ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        ? "bg-bg-primary text-text-primary"
+                        : "text-text-secondary hover:bg-bg-primary hover:text-text-primary"
                     }`}
                   >
                     {link.label}
@@ -85,16 +110,6 @@ const Navbar = () => {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Center logo for mobile */}
-          <div className="lg:hidden flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white font-bold">
-                TC
-              </div>
-              <span className="font-bold text-lg">TeamCollab</span>
-            </Link>
           </div>
 
           {/* Right side items */}
@@ -110,7 +125,7 @@ const Navbar = () => {
               <>
                 <Link
                   to="/login"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                  className="text-text-secondary hover:text-accent px-3 py-2 text-sm font-medium transition-colors duration-200"
                 >
                   Sign in
                 </Link>
