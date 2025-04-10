@@ -488,6 +488,90 @@ code {
 }
 
 /* Project section tabs */
+/* Input focus styles */
+input:focus,
+textarea:focus,
+select:focus {
+  @apply ring-2 ring-accent border-transparent outline-none transition-all duration-200;
+}
+
+/* Card hover effects */
+.project-card {
+  @apply transition-all duration-300;
+}
+
+.project-card:hover {
+  @apply shadow-md transform translate-y-[-2px];
+}
+
+/* Animation for delete and finish buttons */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.action-button {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Calendar customization */
+.react-datepicker {
+  @apply border border-border bg-bg-primary shadow-lg rounded-md !important;
+}
+
+.react-datepicker__header {
+  @apply bg-bg-secondary border-border border-b !important;
+}
+
+.react-datepicker__day--selected {
+  @apply bg-accent text-white !important;
+}
+
+.react-datepicker__day:hover {
+  @apply bg-accent bg-opacity-10 !important;
+}
+
+.react-datepicker__day--keyboard-selected {
+  @apply bg-accent bg-opacity-20 !important;
+}
+
+/* Deadline styling */
+.deadline-soon {
+  @apply text-danger font-medium;
+}
+
+/* Project card action buttons */
+.project-action-buttons {
+  @apply opacity-0 group-hover:opacity-100 transition-opacity duration-200;
+}
+
+/* Form step transitions */
+.form-step {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.form-step-enter {
+  @apply opacity-0 transform translate-x-4;
+}
+
+.form-step-enter-active {
+  @apply opacity-100 transform translate-x-0;
+}
+
+.form-step-exit {
+  @apply opacity-100 transform translate-x-0;
+}
+
+.form-step-exit-active {
+  @apply opacity-0 transform -translate-x-4;
+}
+
 .project-tab {
   @apply flex items-center px-4 py-2 border-b-2 transition-colors;
 }

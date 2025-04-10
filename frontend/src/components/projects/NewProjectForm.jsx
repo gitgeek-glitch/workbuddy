@@ -29,6 +29,7 @@ const NewProjectForm = ({ onClose }) => {
   const [activeStep, setActiveStep] = useState(1) // 1: Basic Info, 2: Deadline, 3: Collaborators
   const searchRef = useRef(null)
   const calendarRef = useRef(null)
+  const formRef = useRef(null)
 
   // Create a state to hold the selected date as a Date object
   const [selectedDate, setSelectedDate] = useState(null)
@@ -122,7 +123,13 @@ const NewProjectForm = ({ onClose }) => {
   }
 
   // Add collaborator to the list
-  const addCollaborator = (user) => {
+  const addCollaborator = (user, e) => {
+    // Important: Stop the event from propagating to prevent form submission
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
     // Check if maximum collaborators reached (8 total including project creator)
     if (formData.collaborators.length >= 7) {
       toast.warning("Maximum of 7 collaborators can be added (8 total including you)")
@@ -145,7 +152,13 @@ const NewProjectForm = ({ onClose }) => {
   }
 
   // Remove collaborator from the list
-  const removeCollaborator = (userId) => {
+  const removeCollaborator = (userId, e) => {
+    // Stop propagation to prevent form submission
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    
     setFormData((prev) => ({
       ...prev,
       collaborators: prev.collaborators.filter((collab) => collab._id !== userId),
@@ -153,7 +166,10 @@ const NewProjectForm = ({ onClose }) => {
   }
 
   // Navigate between steps
-  const nextStep = () => {
+  const nextStep = (e) => {
+    // Prevent form submission
+    e.preventDefault()
+    
     if (activeStep === 1 && !formData.name.trim()) {
       toast.error("Project name is required")
       return
@@ -164,7 +180,10 @@ const NewProjectForm = ({ onClose }) => {
     }
   }
 
-  const prevStep = () => {
+  const prevStep = (e) => {
+    // Prevent form submission
+    e.preventDefault()
+    
     if (activeStep > 1) {
       setActiveStep(activeStep - 1)
     }
@@ -285,7 +304,7 @@ const NewProjectForm = ({ onClose }) => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6">
+      <form ref={formRef} onSubmit={handleSubmit} className="p-6">
         {/* Step 1: Basic Info */}
         {activeStep === 1 && (
           <div className="space-y-4">
@@ -391,7 +410,10 @@ const NewProjectForm = ({ onClose }) => {
                       <div
                         key={user._id}
                         className="p-3 hover:bg-bg-secondary cursor-pointer flex items-center justify-between border-b border-border last:border-0"
-                        onClick={() => addCollaborator(user)}
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevent form submission
+                          addCollaborator(user, e);
+                        }}
                       >
                         <div className="flex items-center">
                           <div className="w-10 h-10 bg-accent bg-opacity-10 rounded-full flex items-center justify-center mr-3">
@@ -403,11 +425,12 @@ const NewProjectForm = ({ onClose }) => {
                           </div>
                         </div>
                         <button
-                          type="button"
+                          type="button" // Important: explicitly set as button type
                           className="text-accent hover:text-accent-dark bg-accent bg-opacity-10 hover:bg-opacity-20 rounded-full p-1.5 transition-colors"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            addCollaborator(user)
+                            e.preventDefault(); // Prevent form submission
+                            e.stopPropagation(); // Prevent event bubbling
+                            addCollaborator(user, e);
                           }}
                         >
                           <FiPlus size={16} />
@@ -447,8 +470,8 @@ const NewProjectForm = ({ onClose }) => {
                         </div>
                       </div>
                       <button
-                        type="button"
-                        onClick={() => removeCollaborator(collab._id)}
+                        type="button" // Important: explicitly set as button type
+                        onClick={(e) => removeCollaborator(collab._id, e)}
                         className="text-text-secondary hover:text-danger bg-bg-primary hover:bg-danger hover:bg-opacity-10 rounded-full p-1.5 transition-colors"
                       >
                         <FiX size={14} />
@@ -469,7 +492,11 @@ const NewProjectForm = ({ onClose }) => {
         <div className="flex justify-between mt-8">
           <div>
             {activeStep > 1 && (
-              <button type="button" onClick={prevStep} className="btn-secondary">
+              <button
+                type="button" // Important: explicitly set as button type
+                onClick={prevStep}
+                className="btn-secondary"
+              >
                 Back
               </button>
             )}
@@ -477,17 +504,29 @@ const NewProjectForm = ({ onClose }) => {
 
           <div className="flex space-x-3">
             {onClose && (
-              <button type="button" onClick={onClose} className="btn-secondary">
+              <button
+                type="button" // Important: explicitly set as button type
+                onClick={onClose}
+                className="btn-secondary"
+              >
                 Cancel
               </button>
             )}
 
             {activeStep < 3 ? (
-              <button type="button" onClick={nextStep} className="btn-primary">
+              <button
+                type="button" // Important: explicitly set as button type
+                onClick={nextStep}
+                className="btn-primary"
+              >
                 Continue
               </button>
             ) : (
-              <button type="submit" className="btn-primary flex items-center" disabled={isSubmitting}>
+              <button
+                type="submit" // This is the only actual submit button
+                className="btn-primary flex items-center"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>

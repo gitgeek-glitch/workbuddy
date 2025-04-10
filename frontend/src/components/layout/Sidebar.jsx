@@ -180,7 +180,7 @@ const Sidebar = () => {
           </li>
 
           {/* Starred Projects Section */}
-          <li className="mt-2">
+          {/* <li className="mt-2">
             <button
               onClick={() => {
                 if (sidebarCollapsed) {
@@ -253,10 +253,10 @@ const Sidebar = () => {
                 )}
               </ul>
             )}
-          </li>
+          </li> */}
 
           {/* Recent Projects Section */}
-          <li className="mt-2">
+          {/* <li className="mt-2">
             <button
               onClick={() => {
                 if (sidebarCollapsed) {
@@ -329,7 +329,7 @@ const Sidebar = () => {
                 )}
               </ul>
             )}
-          </li>
+          </li> */}
 
           <li className="mt-2">
             <Link
