@@ -137,7 +137,7 @@ const NewProjectForm = ({ onClose }) => {
       }
 
       // Create project API call
-      const response = await axios.post(`${API_URL}/api/projects`, projectData, {
+      const response = await axios.post(`${API_URL}/api/project`, projectData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
