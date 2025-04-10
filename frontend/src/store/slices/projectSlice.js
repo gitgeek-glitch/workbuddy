@@ -54,6 +54,37 @@ const projectSlice = createSlice({
       const projectIndex = state.projects.findIndex((project) => project.id === id)
       if (projectIndex !== -1) {
         state.projects[projectIndex] = { ...state.projects[projectIndex], ...projectData }
+
+        // Also update in starred and recent projects if present
+        const starredIndex = state.starredProjects.findIndex((p) => p.id === id)
+        if (starredIndex !== -1) {
+          state.starredProjects[starredIndex] = { ...state.starredProjects[starredIndex], ...projectData }
+        }
+
+        const recentIndex = state.recentProjects.findIndex((p) => p.id === id)
+        if (recentIndex !== -1) {
+          state.recentProjects[recentIndex] = { ...state.recentProjects[recentIndex], ...projectData }
+        }
+      }
+    },
+    toggleProjectImportant: (state, action) => {
+      const projectId = action.payload
+      const projectIndex = state.projects.findIndex((project) => project.id === projectId)
+
+      if (projectIndex !== -1) {
+        const currentImportant = state.projects[projectIndex].important || false
+        state.projects[projectIndex].important = !currentImportant
+
+        // Also update in starred and recent projects if present
+        const starredIndex = state.starredProjects.findIndex((p) => p.id === projectId)
+        if (starredIndex !== -1) {
+          state.starredProjects[starredIndex].important = !currentImportant
+        }
+
+        const recentIndex = state.recentProjects.findIndex((p) => p.id === projectId)
+        if (recentIndex !== -1) {
+          state.recentProjects[recentIndex].important = !currentImportant
+        }
       }
     },
   },
@@ -74,6 +105,6 @@ const projectSlice = createSlice({
   },
 })
 
-export const { starProject, unstarProject, addToRecent, updateProject } = projectSlice.actions
+export const { starProject, unstarProject, addToRecent, updateProject, toggleProjectImportant } = projectSlice.actions
 
 export default projectSlice.reducer

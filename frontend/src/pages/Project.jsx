@@ -27,7 +27,7 @@ const Project = () => {
     )
   }
 
-  // Filter projects based on status, search term, and active tab
+  // Filter and sort projects
   const filteredProjects = projects
     .filter((project) => {
       // First filter by ongoing/finished status
@@ -37,13 +37,28 @@ const Project = () => {
         return project.status === "finished"
       }
     })
-    .filter((project) => filter === "all" || project.status === filter) // Then by filter (active/archived)
+    .filter((project) => {
+      // Then apply additional filters for ongoing projects
+      if (activeTab === "ongoing") {
+        if (filter === "important") {
+          return project.important === true
+        }
+        return true // "all" filter shows everything
+      }
+      return true // No additional filters for finished projects
+    })
     .filter(
       (project) =>
         searchTerm === "" ||
         project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.description.toLowerCase().includes(searchTerm.toLowerCase()),
     )
+    // Sort by deadline (ascending) - projects with no deadline come last
+    .sort((a, b) => {
+      if (!a.deadline) return 1
+      if (!b.deadline) return -1
+      return new Date(a.deadline) - new Date(b.deadline)
+    })
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -74,6 +89,7 @@ const Project = () => {
         </button>
       </div>
 
+      {/* Search and filters - only show filters for ongoing tab */}
       <div className="mb-6">
         <div className="relative mb-4">
           <input
@@ -86,30 +102,30 @@ const Project = () => {
           <FiSearch className="absolute left-3 top-2.5 text-text-secondary" />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center mr-2">
-            <FiFilter className="mr-1" />
-            <span>Filter:</span>
+        {activeTab === "ongoing" && (
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center mr-2">
+              <FiFilter className="mr-1" />
+              <span>Filter:</span>
+            </div>
+            <button
+              onClick={() => setFilter("all")}
+              className={`px-3 py-1 rounded-md text-sm ${
+                filter === "all" ? "bg-accent text-white" : "bg-bg-secondary"
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilter("important")}
+              className={`px-3 py-1 rounded-md text-sm ${
+                filter === "important" ? "bg-accent text-white" : "bg-bg-secondary"
+              }`}
+            >
+              Important
+            </button>
           </div>
-          <button
-            onClick={() => setFilter("all")}
-            className={`px-3 py-1 rounded-md text-sm ${filter === "all" ? "bg-accent text-white" : "bg-bg-secondary"}`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setFilter("active")}
-            className={`px-3 py-1 rounded-md text-sm ${filter === "active" ? "bg-accent text-white" : "bg-bg-secondary"}`}
-          >
-            Active
-          </button>
-          <button
-            onClick={() => setFilter("archived")}
-            className={`px-3 py-1 rounded-md text-sm ${filter === "archived" ? "bg-accent text-white" : "bg-bg-secondary"}`}
-          >
-            Archived
-          </button>
-        </div>
+        )}
       </div>
 
       {filteredProjects.length === 0 ? (
