@@ -15,7 +15,7 @@ const notificationSchema = new mongoose.Schema({
     },
     type: {
       type: String,
-      enum: ["Invitation", "File-Status", "Message", "Role-Change"],
+      enum: ["Invitation", "File-Status", "Role-Change"],
       required: true,
     },
     read: { 
