@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { FiBell } from "react-icons/fi"
 import { Link } from "react-router-dom"
+import axios from "axios"
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead } from "../store/slices/notificationSlice"
 
 const NotificationBell = () => {
@@ -12,9 +13,15 @@ const NotificationBell = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef(null)
 
-  // Fetch notifications on component mount
+  // Fetch notifications on component mount and when dropdown opens
   useEffect(() => {
     dispatch(fetchNotifications())
+    // Set up interval to periodically check for new notifications
+    const interval = setInterval(() => {
+      dispatch(fetchNotifications())
+    }, 30000) // Check every 30 seconds
+
+    return () => clearInterval(interval)
   }, [dispatch])
 
   // Close dropdown when clicking outside
@@ -40,6 +47,67 @@ const NotificationBell = () => {
   // Handle mark all as read
   const handleMarkAllAsRead = () => {
     dispatch(markAllNotificationsRead())
+  }
+
+  // Handle accept invitation
+  const handleAcceptInvitation = async (e, projectId, notificationId) => {
+    e.stopPropagation()
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+      const API_URL = import.meta.env.VITE_API_URL
+
+      // Call the accept invitation endpoint
+      await axios.post(
+        `${API_URL}/api/project/${projectId._id}/accept`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        },
+      )
+
+      // Mark the notification as read
+      dispatch(markNotificationRead(notificationId))
+
+      // Refresh notifications
+      dispatch(fetchNotifications())
+
+      // Close dropdown
+      setDropdownOpen(false)
+    } catch (error) {
+      console.error("Error accepting invitation:", error)
+    }
+  }
+
+  // Handle decline invitation
+  const handleDeclineInvitation = async (e, projectId, notificationId) => {
+    e.stopPropagation()
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+      const API_URL = import.meta.env.VITE_API_URL
+
+      // Call the decline invitation endpoint
+      await axios.post(
+        `${API_URL}/api/project/${projectId}/decline`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        },
+      )
+
+      // Mark the notification as read
+      dispatch(markNotificationRead(notificationId))
+
+      // Refresh notifications
+      dispatch(fetchNotifications())
+    } catch (error) {
+      console.error("Error declining invitation:", error)
+    }
   }
 
   // Format notification time
@@ -199,7 +267,27 @@ const NotificationBell = () => {
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {formatTime(notification.createdAt)}
                       </p>
-                      {!notification.read && (
+
+                      {/* Invitation actions */}
+                      {notification.type === "Invitation" && notification.projectId && !notification.read && (
+                        <div className="mt-2 flex space-x-2">
+                          <button
+                            className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
+                            onClick={(e) => handleAcceptInvitation(e, notification.projectId, notification._id)}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors"
+                            onClick={(e) => handleDeclineInvitation(e, notification.projectId, notification._id)}
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Mark as read button (only for non-invitation notifications) */}
+                      {!notification.read && notification.type !== "Invitation" && (
                         <button
                           className="text-xs text-blue-500 hover:underline mt-1"
                           onClick={(e) => handleMarkAsRead(e, notification._id)}

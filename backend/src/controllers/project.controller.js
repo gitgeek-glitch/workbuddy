@@ -221,7 +221,7 @@ export const acceptInvitation = async (req, res) => {
         leader.userId,
         `User ${req.user.username} has joined your project "${project.name}"`,
         project._id,
-        "Invitation",
+        "Role-Change",
       )
 
       // Send real-time notification

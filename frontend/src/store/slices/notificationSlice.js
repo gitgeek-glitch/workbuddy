@@ -21,12 +21,12 @@ export const fetchNotifications = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch notifications")
     }
-  }
+  },
 )
 
 export const markNotificationRead = createAsyncThunk(
   "notifications/markNotificationRead",
-  async (notificationId, { rejectWithValue }) => {
+  async (notificationId, { rejectWithValue, dispatch }) => {
     try {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
 
@@ -38,19 +38,22 @@ export const markNotificationRead = createAsyncThunk(
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       )
+
+      // Refresh all notifications to ensure counts are updated correctly
+      dispatch(fetchNotifications())
 
       return { notificationId, data: response.data.data[0] }
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to mark notification as read")
     }
-  }
+  },
 )
 
 export const markAllNotificationsRead = createAsyncThunk(
   "notifications/markAllNotificationsRead",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, dispatch }) => {
     try {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
 
@@ -62,14 +65,17 @@ export const markAllNotificationsRead = createAsyncThunk(
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       )
+
+      // Refresh all notifications to ensure counts are updated correctly
+      dispatch(fetchNotifications())
 
       return true
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to mark all notifications as read")
     }
-  }
+  },
 )
 
 // Notification slice
@@ -83,8 +89,15 @@ const notificationSlice = createSlice({
   },
   reducers: {
     addNotification: (state, action) => {
-      state.notifications.unshift(action.payload)
-      state.unreadCount += 1
+      // Check if notification already exists to prevent duplicates
+      const exists = state.notifications.some((n) => n._id === action.payload._id)
+
+      if (!exists) {
+        state.notifications.unshift(action.payload)
+        if (!action.payload.read) {
+          state.unreadCount += 1
+        }
+      }
     },
     clearNotifications: (state) => {
       state.notifications = []
@@ -111,7 +124,7 @@ const notificationSlice = createSlice({
       // Mark notification as read
       .addCase(markNotificationRead.fulfilled, (state, action) => {
         const index = state.notifications.findIndex(
-          (notification) => notification._id === action.payload.notificationId
+          (notification) => notification._id === action.payload.notificationId,
         )
         if (index !== -1) {
           state.notifications[index].read = true

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { FiBell } from "react-icons/fi"
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead } from "../store/slices/notificationSlice"
+import axios from "axios"
 
 const Notifications = () => {
   const dispatch = useDispatch()
@@ -31,6 +32,62 @@ const Notifications = () => {
   // Mark all notifications as read
   const handleMarkAllAsRead = () => {
     dispatch(markAllNotificationsRead())
+  }
+
+  // Handle accept invitation
+  const handleAcceptInvitation = async (projectId, notificationId) => {
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+      const API_URL = import.meta.env.VITE_API_URL
+
+      // Call the accept invitation endpoint
+      await axios.post(
+        `${API_URL}/api/project/${projectId._id}/accept`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        },
+      )
+
+      // Mark the notification as read
+      dispatch(markNotificationRead(notificationId))
+
+      // Refresh notifications
+      dispatch(fetchNotifications())
+    } catch (error) {
+      console.error("Error accepting invitation:", error)
+    }
+  }
+
+  // Handle decline invitation
+  const handleDeclineInvitation = async (projectId, notificationId) => {
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+      const API_URL = import.meta.env.VITE_API_URL
+
+      // Call the decline invitation endpoint
+      await axios.post(
+        `${API_URL}/api/project/${projectId}/decline`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        },
+      )
+
+      // Mark the notification as read
+      dispatch(markNotificationRead(notificationId))
+
+      // Refresh notifications
+      dispatch(fetchNotifications())
+    } catch (error) {
+      console.error("Error declining invitation:", error)
+    }
   }
 
   // Format notification time
@@ -213,7 +270,6 @@ const Notifications = () => {
               <div
                 key={notification._id}
                 className={`p-4 hover:bg-bg-primary transition-colors ${notification.read ? "opacity-70" : ""}`}
-                onClick={() => !notification.read && handleMarkAsRead(notification._id)}
               >
                 <div className="flex">
                   <div className="flex-shrink-0 mt-0.5">{getNotificationIcon(notification.type)}</div>
@@ -229,7 +285,27 @@ const Notifications = () => {
                         Project: {notification.projectId.name || notification.projectId}
                       </p>
                     )}
-                    {!notification.read && (
+
+                    {/* Invitation actions */}
+                    {notification.type === "Invitation" && notification.projectId && !notification.read && (
+                      <div className="mt-3 flex space-x-3">
+                        <button
+                          className="px-4 py-2 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                          onClick={() => handleAcceptInvitation(notification.projectId, notification._id)}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                          onClick={() => handleDeclineInvitation(notification.projectId, notification._id)}
+                        >
+                          Decline
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Mark as read button (only for non-invitation notifications) */}
+                    {!notification.read && notification.type !== "Invitation" && (
                       <button
                         className="text-xs text-accent hover:underline mt-2"
                         onClick={(e) => {

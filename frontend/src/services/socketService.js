@@ -1,5 +1,5 @@
 import { io } from "socket.io-client"
-import { addNotification } from "../store/slices/notificationSlice"
+import { addNotification, fetchNotifications } from "../store/slices/notificationSlice"
 
 let socket = null
 
@@ -7,7 +7,7 @@ export const initializeSocket = (token, store) => {
   if (socket) {
     socket.disconnect()
   }
-  const API_URL = import.meta.env.VITE_API_URL;  
+  const API_URL = import.meta.env.VITE_API_URL
 
   socket = io(API_URL, {
     auth: {
@@ -17,6 +17,9 @@ export const initializeSocket = (token, store) => {
 
   socket.on("connect", () => {
     console.log("Socket connected")
+
+    // Fetch notifications when socket connects to ensure we have the latest data
+    store.dispatch(fetchNotifications())
   })
 
   socket.on("disconnect", () => {
@@ -30,7 +33,12 @@ export const initializeSocket = (token, store) => {
   // Listen for notifications
   socket.on("notification", (notification) => {
     console.log("New notification received:", notification)
+
+    // Add the notification to the store
     store.dispatch(addNotification(notification))
+
+    // Immediately fetch all notifications to ensure counts are updated correctly
+    store.dispatch(fetchNotifications())
 
     // Show browser notification if supported
     if ("Notification" in window && Notification.permission === "granted") {
