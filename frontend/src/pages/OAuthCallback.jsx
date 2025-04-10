@@ -67,8 +67,8 @@ const OAuthCallback = () => {
           }),
         ).unwrap()
 
-        // Show success message
-        navigate("/", {
+        // Redirect to dashboard after successful login
+        navigate("/dashboard", {
           state: {
             successMessage: "Successfully logged in with " + (searchParams.get("provider") || "social account"),
           },
@@ -111,4 +111,3 @@ const OAuthCallback = () => {
 }
 
 export default OAuthCallback
-

@@ -3,10 +3,11 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
-import { FiGithub } from "react-icons/fi"
+import { FiGithub, FiArrowLeft } from "react-icons/fi"
 import { FcGoogle } from "react-icons/fc"
 import { toast } from "react-toastify"
 import { loginUser } from "../store/slices/userSlice"
+import ThemeToggle from "../components/ui/ThemeToggle"
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
 
@@ -21,6 +22,7 @@ const Login = () => {
     rememberMe: false,
   })
   const [error, setError] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -30,8 +32,7 @@ const Login = () => {
     }))
   }
 
-  const handleSubmit = async (e) => {    
-    
+  const handleSubmit = async (e) => {
     e.preventDefault() // Prevent default form submission
     setError("")
 
@@ -41,19 +42,22 @@ const Login = () => {
       return
     }
 
+    // Password length validation
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long")
+      return
+    }
+
     try {
       // Dispatch login action and get the result
       const resultAction = await dispatch(loginUser(formData))
 
       // Check if the action was fulfilled or rejected
-      console.log("Hi")
       if (loginUser.fulfilled.match(resultAction)) {
         toast.success("Login successful!")
         navigate("/dashboard")
       } else if (loginUser.rejected.match(resultAction)) {
         // Set error from the payload
-        console.log(resultAction.payload);
-        
         setError(resultAction.payload || "Login failed. Please check your credentials.")
       }
     } catch (error) {
@@ -74,7 +78,13 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg-primary text-text-primary">
-      <div className="flex justify-end p-4">{/* ThemeToggle component would be here */}</div>
+      <div className="flex justify-between p-4">
+        <Link to="/" className="flex items-center text-text-secondary hover:text-accent transition-colors">
+          <FiArrowLeft className="mr-1" />
+          Back to Home
+        </Link>
+        <ThemeToggle />
+      </div>
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-md">
@@ -84,7 +94,7 @@ const Login = () => {
           </div>
 
           {displayError && (
-            <div className="bg-danger bg-opacity-10 border border-danger text-white px-4 py-3 rounded-md mb-4">
+            <div className="bg-danger bg-opacity-10 border border-danger text-danger px-4 py-3 rounded-md mb-4">
               {displayError}
             </div>
           )}
@@ -115,16 +125,28 @@ const Login = () => {
                   Forgot password?
                 </Link>
               </div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="input w-full"
-                placeholder="••••••••"
-                disabled={loading}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="input w-full"
+                  placeholder="Minimum 8 characters"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+              {formData.password && formData.password.length < 8 && (
+                <p className="text-xs text-red-500 mt-1">Password must be at least 8 characters long</p>
+              )}
             </div>
 
             <div className="flex items-center">
@@ -218,4 +240,3 @@ const Login = () => {
 }
 
 export default Login
-

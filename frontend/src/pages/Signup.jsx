@@ -1,13 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
-import { FiGithub } from "react-icons/fi"
+import { FiGithub, FiArrowLeft } from "react-icons/fi"
 import { FcGoogle } from "react-icons/fc"
+import { debounce } from "lodash"
+import axios from "axios"
 import { signupUser } from "../store/slices/userSlice"
+import ThemeToggle from "../components/ui/ThemeToggle"
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:7000"
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
 
 const Signup = () => {
   const navigate = useNavigate()
@@ -28,14 +31,15 @@ const Signup = () => {
     available: null,
     message: "",
   })
+  const [showPassword, setShowPassword] = useState(false)
 
   // Create a debounced function for checking username availability
-  const checkUsernameAvailability = async (username) => {
-    if (!username) {
+  const checkUsernameAvailability = debounce(async (username) => {
+    if (!username || username.length < 3) {
       setUsernameStatus({
         checking: false,
         available: null,
-        message: "",
+        message: username ? "Username must be at least 3 characters long" : "",
       })
       return
     }
@@ -43,13 +47,13 @@ const Signup = () => {
     setUsernameStatus((prev) => ({ ...prev, checking: true }))
 
     try {
-      const response = await fetch(`${API_URL}/api/user/check-username?username=${encodeURIComponent(username)}`)
-      const data = await response.json()
+      const response = await axios.get(`${API_URL}/auth/check-username?username=${encodeURIComponent(username)}`)
+      const { available, message } = response.data
 
       setUsernameStatus({
         checking: false,
-        available: data.available,
-        message: data.message,
+        available,
+        message,
       })
     } catch (error) {
       setUsernameStatus({
@@ -58,18 +62,17 @@ const Signup = () => {
         message: "Error checking username",
       })
     }
-  }
+  }, 500)
 
-  // Use useEffect to check username when it changes
-  // This is commented out to avoid the debounce dependency
-  // useEffect(() => {
-  //   if (formData.username) {
-  //     const timeoutId = setTimeout(() => {
-  //       checkUsernameAvailability(formData.username)
-  //     }, 500)
-  //     return () => clearTimeout(timeoutId)
-  //   }
-  // }, [formData.username])
+  useEffect(() => {
+    if (formData.username) {
+      checkUsernameAvailability(formData.username)
+    }
+
+    return () => {
+      checkUsernameAvailability.cancel()
+    }
+  }, [formData.username])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -77,20 +80,27 @@ const Signup = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }))
-
-    // Check username availability after a delay
-    if (name === "username" && value.length >= 3) {
-      setTimeout(() => checkUsernameAvailability(value), 500)
-    }
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault() 
+    e.preventDefault()
     setError("")
 
     // Basic validation
     if (!formData.fullName || !formData.username || !formData.email || !formData.password) {
       setError("Please fill in all required fields")
+      return
+    }
+
+    // Username length validation
+    if (formData.username.length < 3) {
+      setError("Username must be at least 3 characters long")
+      return
+    }
+
+    // Password length validation
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long")
       return
     }
 
@@ -119,10 +129,10 @@ const Signup = () => {
 
       // Dispatch signup action
       const resultAction = await dispatch(signupUser(signupData))
-      
+
       // Check if the action was fulfilled or rejected
-      if (signupUser.fulfilled.match(resultAction)) {        
-        navigate("/")
+      if (signupUser.fulfilled.match(resultAction)) {
+        navigate("/dashboard")
       } else if (signupUser.rejected.match(resultAction)) {
         setError(resultAction.payload || "An error occurred during registration")
       }
@@ -140,9 +150,13 @@ const Signup = () => {
   const displayError = error || reduxError
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-primary text-text-primary pb-12 pt-12">
-      <div className="flex justify-end p-4">
-        {/* ThemeToggle component would be here */}
+    <div className="min-h-screen flex flex-col bg-bg-primary text-text-primary">
+      <div className="flex justify-between p-4">
+        <Link to="/" className="flex items-center text-text-secondary hover:text-accent transition-colors">
+          <FiArrowLeft className="mr-1" />
+          Back to Home
+        </Link>
+        <ThemeToggle />
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4">
@@ -153,7 +167,7 @@ const Signup = () => {
           </div>
 
           {displayError && (
-            <div className="bg-danger bg-opacity-10 border border-danger text-white px-4 py-3 rounded-md mb-4">
+            <div className="bg-danger bg-opacity-10 border border-danger text-danger px-4 py-3 rounded-md mb-4">
               {displayError}
             </div>
           )}
@@ -187,11 +201,11 @@ const Signup = () => {
                 className={`input w-full ${
                   usernameStatus.available === true
                     ? "border-green-500"
-                    : usernameStatus.available === false
+                    : usernameStatus.available === false || (formData.username && formData.username.length < 3)
                       ? "border-red-500"
                       : ""
                 }`}
-                placeholder="johndoe"
+                placeholder="Minimum 3 characters"
                 disabled={loading}
               />
               {usernameStatus.checking && <p className="text-sm text-text-secondary mt-1">Checking availability...</p>}
@@ -200,6 +214,12 @@ const Signup = () => {
                   {usernameStatus.message}
                 </p>
               )}
+              {!usernameStatus.checking &&
+                !usernameStatus.message &&
+                formData.username &&
+                formData.username.length < 3 && (
+                  <p className="text-xs text-red-500 mt-1">Username must be at least 3 characters long</p>
+                )}
             </div>
 
             <div>
@@ -222,32 +242,51 @@ const Signup = () => {
               <label htmlFor="password" className="block text-sm font-medium mb-1">
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="input w-full"
-                placeholder="••••••••"
-                disabled={loading}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`input w-full ${formData.password && formData.password.length < 8 ? "border-red-500" : ""}`}
+                  placeholder="Minimum 8 characters"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+              {formData.password && formData.password.length < 8 && (
+                <p className="text-xs text-red-500 mt-1">Password must be at least 8 characters long</p>
+              )}
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
                 Confirm Password
               </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="input w-full"
-                placeholder="••••••••"
-                disabled={loading}
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={`input w-full ${
+                    formData.confirmPassword && formData.confirmPassword !== formData.password ? "border-red-500" : ""
+                  }`}
+                  placeholder="Minimum 8 characters"
+                  disabled={loading}
+                />
+              </div>
+              {formData.confirmPassword && formData.confirmPassword !== formData.password && (
+                <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+              )}
             </div>
 
             <div className="flex items-center">

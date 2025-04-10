@@ -11,7 +11,9 @@ const Layout = () => {
     <div className="flex h-screen bg-bg-primary text-text-primary">
       <Sidebar />
       <div
-        className={`flex flex-col flex-1 overflow-hidden transition-all duration-300 ${sidebarCollapsed ? "ml-16" : "ml-0 lg:ml-64"}`}
+        className={`flex flex-col flex-1 overflow-hidden transition-all duration-300 ${
+          sidebarCollapsed ? "ml-20" : "ml-0 lg:ml-72"
+        }`}
       >
         <Navbar />
         <main className="flex-1 overflow-y-auto p-4">

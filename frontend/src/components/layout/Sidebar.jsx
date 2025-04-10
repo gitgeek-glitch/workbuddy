@@ -36,9 +36,10 @@ const Sidebar = () => {
     dispatch(setSidebarCollapsed(true))
   }, [dispatch])
 
-  const [projectsExpanded, setProjectsExpanded] = useState(true)
-  const [starredExpanded, setStarredExpanded] = useState(true)
-  const [recentExpanded, setRecentExpanded] = useState(true)
+  // Initialize all sections as collapsed
+  const [projectsExpanded, setProjectsExpanded] = useState(false)
+  const [starredExpanded, setStarredExpanded] = useState(false)
+  const [recentExpanded, setRecentExpanded] = useState(false)
   const [hoveredItem, setHoveredItem] = useState(null)
   const [projectMenuOpen, setProjectMenuOpen] = useState(null)
   const sidebarRef = useRef(null)
@@ -56,7 +57,13 @@ const Sidebar = () => {
   }, [projectMenuOpen])
 
   const isActive = (path) => {
-    return location.pathname === path
+    if (path === "/dashboard") {
+      return location.pathname === "/dashboard"
+    } else if (path === "/dashboard/chat") {
+      return location.pathname.includes("/chat") || location.pathname === "/dashboard/chat"
+    } else {
+      return location.pathname === path || location.pathname.startsWith(path)
+    }
   }
 
   const handleProjectClick = (projectId) => {
@@ -77,8 +84,8 @@ const Sidebar = () => {
   }
 
   return (
-    <aside 
-      ref={sidebarRef} 
+    <aside
+      ref={sidebarRef}
       className={`sidebar fixed h-screen bg-gradient-to-b from-bg-secondary/80 to-bg-secondary backdrop-blur-md transition-all duration-300 ease-in-out border-r border-border/30 ${
         sidebarCollapsed ? "w-20" : "w-72"
       } z-10`}
@@ -95,16 +102,18 @@ const Sidebar = () => {
         </button>
       </div>
 
-      <nav className={`p-3 h-[calc(100vh-64px)] overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent ${
-        sidebarCollapsed ? "overflow-x-hidden" : ""
-      }`}>
+      <nav
+        className={`p-3 h-[calc(100vh-64px)] overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent ${
+          sidebarCollapsed ? "overflow-x-hidden" : ""
+        }`}
+      >
         <ul className="space-y-2 py-2">
           <li>
             <Link
               to="/dashboard"
               className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
-                isActive("/dashboard") 
-                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20" 
+                isActive("/dashboard")
+                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20"
                   : "hover:bg-bg-primary/80 text-text-primary"
               }`}
               onMouseEnter={() => setHoveredItem("dashboard")}
@@ -119,9 +128,11 @@ const Sidebar = () => {
                   isActive("/dashboard") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
                 }`}
               />
-              <span className={`ml-3 relative z-10 transition-all duration-200 ${
-                sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-              }`}>
+              <span
+                className={`ml-3 relative z-10 transition-all duration-200 ${
+                  sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                }`}
+              >
                 Dashboard
               </span>
 
@@ -418,25 +429,27 @@ const Sidebar = () => {
             <Link
               to="/dashboard/chat"
               className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
-                isActive("/chat") 
-                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20" 
+                isActive("/dashboard/chat")
+                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20"
                   : "hover:bg-bg-primary/80 text-text-primary"
               }`}
               onMouseEnter={() => setHoveredItem("chat")}
               onMouseLeave={() => setHoveredItem(null)}
             >
-              {isActive("/chat") && (
+              {isActive("/dashboard/chat") && (
                 <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
               )}
               <FiMessageSquare
                 size={20}
                 className={`flex-shrink-0 relative z-10 ${
-                  isActive("/chat") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
+                  isActive("/dashboard/chat") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
                 }`}
               />
-              <span className={`ml-3 relative z-10 transition-all duration-200 ${
-                sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-              }`}>
+              <span
+                className={`ml-3 relative z-10 transition-all duration-200 ${
+                  sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                }`}
+              >
                 Chat
               </span>
 
@@ -452,8 +465,8 @@ const Sidebar = () => {
             <Link
               to="/team"
               className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
-                isActive("/team") 
-                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20" 
+                isActive("/team")
+                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20"
                   : "hover:bg-bg-primary/80 text-text-primary"
               }`}
               onMouseEnter={() => setHoveredItem("team")}
@@ -468,9 +481,11 @@ const Sidebar = () => {
                   isActive("/team") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
                 }`}
               />
-              <span className={`ml-3 relative z-10 transition-all duration-200 ${
-                sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-              }`}>
+              <span
+                className={`ml-3 relative z-10 transition-all duration-200 ${
+                  sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                }`}
+              >
                 Team
               </span>
 
@@ -487,10 +502,10 @@ const Sidebar = () => {
           <ul className="space-y-2 py-2">
             <li>
               <Link
-                to="/profile"
+                to="/dashboard/profile"
                 className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
-                  isActive("/profile") 
-                    ? "bg-accent text-white font-medium shadow-md shadow-accent/20" 
+                  isActive("/profile")
+                    ? "bg-accent text-white font-medium shadow-md shadow-accent/20"
                     : "hover:bg-bg-primary/80 text-text-primary"
                 }`}
                 onMouseEnter={() => setHoveredItem("profile")}
@@ -505,9 +520,11 @@ const Sidebar = () => {
                     isActive("/profile") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
                   }`}
                 />
-                <span className={`ml-3 relative z-10 transition-all duration-200 ${
-                  sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                }`}>
+                <span
+                  className={`ml-3 relative z-10 transition-all duration-200 ${
+                    sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                  }`}
+                >
                   Profile
                 </span>
 

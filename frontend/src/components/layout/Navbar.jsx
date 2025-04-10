@@ -190,7 +190,7 @@ const Navbar = () => {
   const UserAvatar = ({ onClick, showIndicator }) => (
     <div className="relative">
       <img
-        src={currentUser?.avatar || "/public/avatar.png"}
+        src={currentUser?.avatar || "/avatar.png"}
         alt="Profile"
         className="w-8 h-8 rounded-full border-2 border-transparent hover:border-accent transition-colors duration-200"
         onClick={onClick}
@@ -424,7 +424,7 @@ const Navbar = () => {
                   active={isActivePath(link.to)}
                   onClick={() => dispatch(setMobileMenuOpen(false))}                  
                 >
-                  <span className="text-white" >{link.label}</span>
+                  <span className="text-text-primary">{link.label}</span>
                 </NavbarLink>
               </li>
             ))}
@@ -497,7 +497,7 @@ const Navbar = () => {
             <div className="flex space-x-1">
               {navigationLinks.map((link) => (
                 <NavbarLink key={link.to} to={link.to} active={isActivePath(link.to)}>
-                  <span className="text-white">{link.label}</span>
+                  <span className="text-text-primary">{link.label}</span>
                 </NavbarLink>
               ))}
             </div>
