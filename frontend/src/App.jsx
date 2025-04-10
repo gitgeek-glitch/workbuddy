@@ -14,9 +14,11 @@ import { setTheme } from "./store/slices/themeSlice"
 import Layout from "./components/layout/Layout"
 import Landing from "./pages/Landing"
 import Dashboard from "./pages/Dashboard"
+import Project from "./pages/Project"
 import ProjectDetails from "./pages/ProjectDetails"
 import Chat from "./pages/Chat"
 import Profile from "./pages/Profile"
+import Notifications from "./pages/Notifications"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import OAuthCallback from "./pages/OAuthCallback"
@@ -57,6 +59,12 @@ const AppContent = () => {
         {/* Protected routes */}
         <Route path="/dashboard" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
           <Route index element={<Dashboard />} />
+        </Route>
+        <Route path="/dashboard/projects" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
+          <Route index element={<Project />} />
+        </Route>
+        <Route path="/dashboard/notifications" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
+          <Route index element={<Notifications />} />
         </Route>
         <Route path="/projects/:id" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
           <Route index element={<ProjectDetails />} />

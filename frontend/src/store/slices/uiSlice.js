@@ -1,18 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit"
 
 const initialState = {
+  darkMode: true,
   sidebarCollapsed: false,
-  sidebarVisible: true,
   mobileMenuOpen: false,
-  activeSection: null,
   notifications: [],
-  unreadNotificationsCount: 0,
+  unreadNotificationsCount: 3, // Mock count for now
 }
 
 const uiSlice = createSlice({
   name: "ui",
   initialState,
   reducers: {
+    toggleDarkMode: (state) => {
+      state.darkMode = !state.darkMode
+    },
+    setDarkMode: (state, action) => {
+      state.darkMode = action.payload
+    },
     toggleSidebar: (state) => {
       state.sidebarCollapsed = !state.sidebarCollapsed
     },
@@ -25,8 +30,9 @@ const uiSlice = createSlice({
     setMobileMenuOpen: (state, action) => {
       state.mobileMenuOpen = action.payload
     },
-    setActiveSection: (state, action) => {
-      state.activeSection = action.payload
+    setNotifications: (state, action) => {
+      state.notifications = action.payload
+      state.unreadNotificationsCount = action.payload.filter((n) => !n.read).length
     },
     addNotification: (state, action) => {
       state.notifications.unshift(action.payload)
@@ -47,23 +53,20 @@ const uiSlice = createSlice({
       })
       state.unreadNotificationsCount = 0
     },
-    clearNotifications: (state) => {
-      state.notifications = []
-      state.unreadNotificationsCount = 0
-    },
   },
 })
 
 export const {
+  toggleDarkMode,
+  setDarkMode,
   toggleSidebar,
   setSidebarCollapsed,
   toggleMobileMenu,
   setMobileMenuOpen,
-  setActiveSection,
+  setNotifications,
   addNotification,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-  clearNotifications,
 } = uiSlice.actions
 
 export default uiSlice.reducer

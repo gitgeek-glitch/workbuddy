@@ -1,14 +1,39 @@
 "use client"
-
-import { useState } from "react"
-import { FiPlus, FiFilter, FiSearch } from "react-icons/fi"
 import { useSelector } from "react-redux"
-import ProjectCard from "../components/projects/ProjectCard"
+import { FiGitCommit, FiUsers, FiGitPullRequest, FiGitBranch, FiStar } from "react-icons/fi"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 
 const Dashboard = () => {
   const { projects, loading, error } = useSelector((state) => state.projects)
-  const [filter, setFilter] = useState("all")
-  const [searchTerm, setSearchTerm] = useState("")
+  const { currentUser } = useSelector((state) => state.user)
+
+  // Calculate total team members across all projects
+  const allTeamMembers = projects.reduce((acc, project) => {
+    project.teamMembers.forEach((member) => {
+      if (!acc.some((m) => m.id === member.id)) {
+        acc.push(member)
+      }
+    })
+    return acc
+  }, [])
+
+  // Calculate total commits across all projects
+  const totalCommits = projects.reduce((sum, project) => sum + project.commits, 0)
+
+  // Calculate total pull requests
+  const totalPullRequests = projects.reduce((sum, project) => sum + project.pullRequests, 0)
+
+  // Mock data for user's personal commits
+  const userCommits = 87
+
+  // Mock data for project progress
+  const projectProgress = projects.map((project) => ({
+    id: project.id,
+    name: project.name,
+    progress: Math.floor(Math.random() * 100), // Random progress for demo
+    commits: project.commits,
+    members: project.teamMembers.length,
+  }))
 
   if (loading) {
     return (
@@ -21,87 +46,173 @@ const Dashboard = () => {
   if (error) {
     return (
       <div className="bg-danger/10 border border-danger/30 text-danger rounded-lg p-4 my-4">
-        Error loading projects: {error}
+        Error loading dashboard data: {error}
       </div>
     )
   }
 
-  // Filter projects based on status and search term
-  const filteredProjects = projects
-    .filter((project) => filter === "all" || project.status === filter)
-    .filter(
-      (project) =>
-        searchTerm === "" ||
-        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <button className="btn-primary flex items-center">
-          <FiPlus className="mr-1" /> New Project
-        </button>
+      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-text-secondary">Total Projects</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{projects.length}</div>
+              <div className="ml-auto p-2 bg-accent/10 rounded-full">
+                <FiFolder className="h-5 w-5 text-accent" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-text-secondary">Total Commits</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{totalCommits}</div>
+              <div className="ml-auto p-2 bg-accent/10 rounded-full">
+                <FiGitCommit className="h-5 w-5 text-accent" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-text-secondary">Pull Requests</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{totalPullRequests}</div>
+              <div className="ml-auto p-2 bg-accent/10 rounded-full">
+                <FiGitPullRequest className="h-5 w-5 text-accent" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-text-secondary">Team Members</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{allTeamMembers.length}</div>
+              <div className="ml-auto p-2 bg-accent/10 rounded-full">
+                <FiUsers className="h-5 w-5 text-accent" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="mb-6">
-        <div className="relative mb-4">
-          <input
-            type="text"
-            placeholder="Search projects..."
-            className="w-full bg-bg-primary border border-border rounded-md py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <FiSearch className="absolute left-3 top-2.5 text-text-secondary" />
-        </div>
+      {/* User Stats */}
+      <h2 className="text-xl font-semibold mb-4">Your Activity</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-text-secondary">Your Commits</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{userCommits}</div>
+              <div className="ml-auto p-2 bg-accent/10 rounded-full">
+                <FiGitCommit className="h-5 w-5 text-accent" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center mr-2">
-            <FiFilter className="mr-1" />
-            <span>Filter:</span>
-          </div>
-          <button
-            onClick={() => setFilter("all")}
-            className={`px-3 py-1 rounded-md text-sm ${filter === "all" ? "bg-accent text-white" : "bg-bg-secondary"}`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setFilter("active")}
-            className={`px-3 py-1 rounded-md text-sm ${filter === "active" ? "bg-accent text-white" : "bg-bg-secondary"}`}
-          >
-            Active
-          </button>
-          <button
-            onClick={() => setFilter("archived")}
-            className={`px-3 py-1 rounded-md text-sm ${filter === "archived" ? "bg-accent text-white" : "bg-bg-secondary"}`}
-          >
-            Archived
-          </button>
-        </div>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-text-secondary">Active Projects</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{projects.filter((p) => p.status === "active").length}</div>
+              <div className="ml-auto p-2 bg-accent/10 rounded-full">
+                <FiStar className="h-5 w-5 text-accent" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-text-secondary">Branches</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{Math.floor(totalCommits / 15)}</div> {/* Mock data */}
+              <div className="ml-auto p-2 bg-accent/10 rounded-full">
+                <FiGitBranch className="h-5 w-5 text-accent" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {filteredProjects.length === 0 ? (
-        <div className="bg-bg-secondary border border-border rounded-lg p-8 text-center">
-          <h3 className="text-lg font-medium mb-2">No projects found</h3>
-          <p className="text-text-secondary mb-4">
-            {searchTerm ? "Try a different search term or filter" : "Create your first project to get started"}
-          </p>
-          <button className="btn-primary inline-flex items-center">
-            <FiPlus className="mr-1" /> Create Project
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      )}
+      {/* Project Progress */}
+      <h2 className="text-xl font-semibold mb-4">Project Progress</h2>
+      <div className="grid grid-cols-1 gap-4">
+        {projectProgress.map((project) => (
+          <Card key={project.id}>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-medium">{project.name}</h3>
+                <span className="text-sm text-text-secondary">{project.progress}% complete</span>
+              </div>
+              <div className="w-full bg-bg-primary rounded-full h-2.5 mb-4">
+                <div className="bg-accent h-2.5 rounded-full" style={{ width: `${project.progress}%` }}></div>
+              </div>
+              <div className="flex justify-between text-sm text-text-secondary">
+                <div className="flex items-center">
+                  <FiGitCommit className="mr-1" />
+                  {project.commits} commits
+                </div>
+                <div className="flex items-center">
+                  <FiUsers className="mr-1" />
+                  {project.members} members
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Team Members */}
+      <h2 className="text-xl font-semibold mt-8 mb-4">Team Members</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {allTeamMembers.slice(0, 6).map((member) => (
+          <Card key={member.id}>
+            <CardContent className="p-6 flex items-center">
+              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent font-medium mr-3">
+                {member.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
+              </div>
+              <div>
+                <h3 className="font-medium">{member.name}</h3>
+                <p className="text-sm text-text-secondary">Team Member</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }
 
 export default Dashboard
+
+// Import for FiFolder icon
+import { FiFolder } from "react-icons/fi"

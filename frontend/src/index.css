@@ -407,6 +407,100 @@ code {
   transition-duration: 500ms;
 }
 
+/* Project progress bar styling */
+.progress-bar {
+  @apply w-full bg-bg-primary rounded-full h-2.5 mb-4;
+}
+
+.progress-bar-fill {
+  @apply bg-accent h-2.5 rounded-full transition-all duration-500 ease-in-out;
+}
+
+/* Dashboard card hover effects */
+.dashboard-card {
+  @apply transition-all duration-300 hover:shadow-md hover:border-accent hover:border-opacity-30;
+}
+
+/* Team member avatar styling */
+.team-avatar {
+  @apply w-10 h-10 rounded-full bg-accent bg-opacity-20 flex items-center justify-center text-accent font-medium;
+}
+
+/* Stats card hover effect */
+.stats-card {
+  @apply hover:bg-bg-primary hover:bg-opacity-50 transition-all duration-300;
+}
+
+/* Stats icon container */
+.stats-icon {
+  @apply p-2 bg-accent bg-opacity-10 rounded-full;
+}
+
+/* Project status badges */
+.status-badge {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.status-badge-ongoing {
+  @apply bg-accent text-accent bg-opacity-10;
+}
+
+.status-badge-finished {
+  @apply bg-success text-success bg-opacity-10;
+}
+
+/* Notification styles */
+.notification-item {
+  @apply p-4 hover:bg-bg-primary hover:bg-opacity-50 transition-colors cursor-pointer;
+}
+
+.notification-item-unread {
+  @apply border-l-2 border-accent;
+}
+
+.notification-icon {
+  @apply w-10 h-10 rounded-full flex items-center justify-center;
+}
+
+.notification-icon-unread {
+  @apply bg-accent text-accent bg-opacity-10;
+}
+
+.notification-icon-read {
+  @apply bg-bg-primary text-text-secondary;
+}
+
+/* Tab navigation */
+.tab-nav {
+  @apply flex border-b border-border mb-6;
+}
+
+.tab-item {
+  @apply px-4 py-2 border-b-2 transition-colors;
+}
+
+.tab-item-active {
+  @apply border-accent text-accent;
+}
+
+.tab-item-inactive {
+  @apply border-transparent hover:text-accent;
+}
+
+/* Project section tabs */
+.project-tab {
+  @apply flex items-center px-4 py-2 border-b-2 transition-colors;
+}
+
+.project-tab-active {
+  @apply border-accent text-accent;
+}
+
+.project-tab-inactive {
+  @apply border-transparent hover:text-accent;
+}
+
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

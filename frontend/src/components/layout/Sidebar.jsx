@@ -11,13 +11,9 @@ import {
   FiSettings,
   FiChevronDown,
   FiChevronRight,
-  FiPlus,
   FiStar,
   FiGitCommit,
-  FiGitBranch,
-  FiMoreHorizontal,
   FiChevronLeft,
-  FiArrowRight,
 } from "react-icons/fi"
 
 import { toggleSidebar, setSidebarCollapsed } from "../../store/slices/uiSlice"
@@ -61,6 +57,8 @@ const Sidebar = () => {
       return location.pathname === "/dashboard"
     } else if (path === "/dashboard/chat") {
       return location.pathname.includes("/chat") || location.pathname === "/dashboard/chat"
+    } else if (path === "/dashboard/projects") {
+      return location.pathname === "/dashboard/projects"
     } else {
       return location.pathname === path || location.pathname.startsWith(path)
     }
@@ -144,133 +142,41 @@ const Sidebar = () => {
             </Link>
           </li>
 
-          {/* Projects Section */}
-          <li className="mt-2">
-            <button
-              onClick={() => {
-                if (sidebarCollapsed) {
-                  dispatch(setSidebarCollapsed(false))
-                } else {
-                  setProjectsExpanded(!projectsExpanded)
-                }
-              }}
-              className={`w-full flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 ${
-                sidebarCollapsed ? "hover:bg-bg-primary/80" : "hover:bg-bg-primary/80"
+          {/* Projects Link */}
+          <li>
+            <Link
+              to="/dashboard/projects"
+              className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
+                isActive("/dashboard/projects")
+                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20"
+                  : "hover:bg-bg-primary/80 text-text-primary"
               }`}
-              onMouseEnter={() => setHoveredItem("projects")}
+              onMouseEnter={() => setHoveredItem("projects-page")}
               onMouseLeave={() => setHoveredItem(null)}
             >
-              <div className="flex items-center space-x-3">
-                <FiFolder size={20} className={`flex-shrink-0 ${sidebarCollapsed ? "text-text-secondary" : ""}`} />
-                <span
-                  className={`transition-all duration-200 font-medium ${
-                    sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                  }`}
-                >
-                  Projects
-                </span>
-              </div>
-
-              {!sidebarCollapsed && (
-                <div className="h-5 w-5 flex items-center justify-center">
-                  {projectsExpanded ? (
-                    <FiChevronDown size={16} className="text-text-secondary" />
-                  ) : (
-                    <FiChevronRight size={16} className="text-text-secondary" />
-                  )}
-                </div>
+              {isActive("/dashboard/projects") && (
+                <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
               )}
+              <FiFolder
+                size={20}
+                className={`flex-shrink-0 relative z-10 ${
+                  isActive("/dashboard/projects") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
+                }`}
+              />
+              <span
+                className={`ml-3 relative z-10 transition-all duration-200 ${
+                  sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                }`}
+              >
+                Projects
+              </span>
 
-              {sidebarCollapsed && hoveredItem === "projects" && (
+              {sidebarCollapsed && hoveredItem === "projects-page" && (
                 <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
                   Projects
                 </div>
               )}
-            </button>
-
-            {/* Only show project list when sidebar is expanded and projects section is expanded */}
-            {!sidebarCollapsed && projectsExpanded && (
-              <ul className="mt-2 space-y-1 pl-4">
-                {projects.map((project) => (
-                  <li key={project.id} className="project-menu-container relative">
-                    <Link
-                      to={`/projects/${project.id}`}
-                      className={`flex items-center rounded-lg px-4 py-2.5 transition-all duration-200 group ${
-                        isActive(`/projects/${project.id}`)
-                          ? "bg-accent/10 text-accent font-medium"
-                          : "hover:bg-bg-primary/90 text-text-primary hover:text-accent/80"
-                      }`}
-                      onClick={() => handleProjectClick(project.id)}
-                    >
-                      <span
-                        className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                          project.status === "active" ? "bg-success" : "bg-warning"
-                        }`}
-                      ></span>
-
-                      <span className="truncate ml-3">{project.name}</span>
-
-                      <button
-                        className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded-md hover:bg-bg-primary"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          setProjectMenuOpen(projectMenuOpen === project.id ? null : project.id)
-                        }}
-                      >
-                        <FiMoreHorizontal size={14} className="text-text-secondary" />
-                      </button>
-                    </Link>
-
-                    {projectMenuOpen === project.id && (
-                      <div className="absolute right-0 mt-1 z-20 w-56 rounded-lg overflow-hidden bg-bg-secondary/95 backdrop-blur-md border border-border/30 shadow-xl">
-                        <div className="p-2">
-                          <button
-                            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-bg-primary/80 hover:text-accent transition-colors text-left"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              navigate(`/projects/${project.id}`)
-                              setProjectMenuOpen(null)
-                            }}
-                          >
-                            <FiArrowRight className="mr-2" />
-                            View project
-                          </button>
-                          <button
-                            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-bg-primary/80 hover:text-accent transition-colors text-left"
-                            onClick={(e) => handleStarProject(project.id, e)}
-                          >
-                            <FiStar className="mr-2" />
-                            {starredProjects.some((p) => p.id === project.id) ? "Unstar project" : "Star project"}
-                          </button>
-                          <button
-                            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-bg-primary/80 hover:text-accent transition-colors text-left"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              setProjectMenuOpen(null)
-                            }}
-                          >
-                            <FiGitBranch className="mr-2" />
-                            Create branch
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </li>
-                ))}
-
-                <li>
-                  <button className="flex items-center space-x-2 w-full rounded-lg px-4 py-2.5 text-text-secondary hover:bg-bg-primary/90 hover:text-accent/80 transition-all duration-200 group">
-                    <div className="h-6 w-6 rounded-full bg-bg-primary flex items-center justify-center group-hover:bg-accent/10">
-                      <FiPlus size={14} className="group-hover:text-accent" />
-                    </div>
-                    <span>New Project</span>
-                  </button>
-                </li>
-              </ul>
-            )}
+            </Link>
           </li>
 
           {/* Starred Projects Section */}
