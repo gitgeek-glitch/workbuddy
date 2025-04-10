@@ -41,6 +41,7 @@ const Notifications = () => {
       const API_URL = import.meta.env.VITE_API_URL
 
       // Call the accept invitation endpoint
+      //working dude
       await axios.post(
         `${API_URL}/api/project/${projectId._id}/accept`,
         {},
