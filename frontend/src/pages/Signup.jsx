@@ -47,7 +47,7 @@ const Signup = () => {
     setUsernameStatus((prev) => ({ ...prev, checking: true }))
 
     try {
-      const response = await axios.get(`${API_URL}/auth/check-username?username=${encodeURIComponent(username)}`)
+      const response = await axios.get(`${API_URL}/api/user/check-username?username=${encodeURIComponent(username)}`)
       const { available, message } = response.data
 
       setUsernameStatus({
