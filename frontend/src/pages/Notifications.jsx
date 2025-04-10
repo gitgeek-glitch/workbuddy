@@ -71,7 +71,7 @@ const Notifications = () => {
 
       // Call the decline invitation endpoint
       await axios.post(
-        `${API_URL}/api/project/${projectId}/decline`,
+        `${API_URL}/api/project/${projectId._id}/decline`,
         {},
         {
           headers: {

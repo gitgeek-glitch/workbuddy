@@ -287,7 +287,7 @@ export const declineInvitation = async (req, res) => {
         leader.userId,
         `User ${req.user.username} has declined the invitation to join project "${project.name}"`,
         project._id,
-        "Invitation",
+        "Role-Change",
       )
 
       // Send real-time notification
