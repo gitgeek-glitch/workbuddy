@@ -9,13 +9,16 @@ const Dashboard = () => {
 
   // Calculate total team members across all projects
   const allTeamMembers = projects.reduce((acc, project) => {
-    project.teamMembers.forEach((member) => {
-      if (!acc.some((m) => m.id === member.id)) {
-        acc.push(member)
-      }
-    })
+    if (Array.isArray(project.teamMembers)) {
+      project.teamMembers.forEach((member) => {
+        if (!acc.some((m) => m.id === member.id)) {
+          acc.push(member)
+        }
+      })
+    }
     return acc
   }, [])
+  
 
   // Calculate total commits across all projects
   const totalCommits = projects.reduce((sum, project) => sum + project.commits, 0)
@@ -31,9 +34,10 @@ const Dashboard = () => {
     id: project.id,
     name: project.name,
     progress: Math.floor(Math.random() * 100), // Random progress for demo
-    commits: project.commits,
-    members: project.teamMembers.length,
+    commits: project.commits || 0,
+    members: Array.isArray(project.teamMembers) ? project.teamMembers.length : 0,
   }))
+  
 
   if (loading) {
     return (

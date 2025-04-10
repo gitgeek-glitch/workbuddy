@@ -1,5 +1,5 @@
 // Mock data for projects
-const mockProjects = [
+let mockProjects = [
   {
     id: "1",
     name: "Team Collaboration Platform",
@@ -112,7 +112,7 @@ const mockProjects = [
 export const fetchProjects = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(mockProjects)
+      resolve([...mockProjects]) // Return a copy to avoid reference issues
     }, 500)
   })
 }
@@ -122,7 +122,7 @@ export const fetchProjectById = (id) => {
     setTimeout(() => {
       const project = mockProjects.find((p) => p.id === id)
       if (project) {
-        resolve(project)
+        resolve({ ...project }) // Return a copy
       } else {
         reject(new Error("Project not found"))
       }
@@ -136,11 +136,15 @@ export const createProject = (projectData) => {
       const newProject = {
         id: Date.now().toString(),
         ...projectData,
-        pullRequests: 0,
-        commits: 0,
+        pullRequests: projectData.pullRequests || 0,
+        commits: projectData.commits || 0,
         status: projectData.status || "active", // Default to active if not specified
         important: projectData.important || false, // Default to not important
       }
+
+      // Add the new project to the mockProjects array
+      mockProjects = [...mockProjects, newProject]
+
       resolve(newProject)
     }, 500)
   })
@@ -152,6 +156,7 @@ export const updateProject = (id, projectData) => {
       const projectIndex = mockProjects.findIndex((p) => p.id === id)
       if (projectIndex !== -1) {
         const updatedProject = { ...mockProjects[projectIndex], ...projectData }
+        mockProjects[projectIndex] = updatedProject
         resolve(updatedProject)
       } else {
         reject(new Error("Project not found"))
@@ -165,6 +170,7 @@ export const deleteProject = (id) => {
     setTimeout(() => {
       const projectIndex = mockProjects.findIndex((p) => p.id === id)
       if (projectIndex !== -1) {
+        mockProjects = mockProjects.filter((p) => p.id !== id)
         resolve({ success: true })
       } else {
         reject(new Error("Project not found"))

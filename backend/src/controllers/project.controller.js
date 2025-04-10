@@ -91,6 +91,61 @@ export const createProject = async (req, res) => {
   }
 }
 
+// Update a project
+export const updateProject = async (req, res) => {
+  try {
+    const { projectId } = req.params
+    const updateData = req.body
+    const userId = req.user._id
+
+    // Find the project
+    const project = await Project.findById(projectId)
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found",
+        data: [],
+        code: 404,
+      })
+    }
+
+    // Check if user is authorized (Leader or Co-Leader)
+    const userMember = project.members.find((member) => member.userId.equals(userId))
+
+    if (!userMember || (userMember.role !== "Leader" && userMember.role !== "Co-Leader")) {
+      return res.status(403).json({
+        message: "Only project leaders and co-leaders can update project details",
+        data: [],
+        code: 403,
+      })
+    }
+
+    // Update allowed fields
+    if (updateData.name) project.name = updateData.name
+    if (updateData.description !== undefined) project.description = updateData.description
+    if (updateData.deadline !== undefined) project.deadline = updateData.deadline
+    if (updateData.status) project.status = updateData.status
+    if (updateData.important !== undefined) project.important = updateData.important
+
+    await project.save()
+
+    logger.info(`${new Date().toISOString()} - Success: Project ${projectId} updated`)
+
+    return res.status(200).json({
+      message: "Project updated successfully",
+      data: [project],
+      code: 200,
+    })
+  } catch (error) {
+    logger.error(`${new Date().toISOString()} - Error: Error updating project - ${error.message}`)
+    return res.status(500).json({
+      message: "Internal Server Error",
+      data: [],
+      code: 500,
+    })
+  }
+}
+
 // Accept project invitation
 export const acceptInvitation = async (req, res) => {
   try {
@@ -457,12 +512,12 @@ export const getUserProjects = async (req, res) => {
       "members.userId": userId,
     })
       .populate("members.userId", "fullName username")
-      .select("name description status deadline members createdAt")
+      .select("name description status deadline members createdAt important")
 
     // Find projects where user is invited
     const invitations = await Project.find({
       invitations: userId,
-    }).select("name description status deadline createdAt")
+    }).select("name description status deadline createdAt important")
 
     logger.info(`${new Date().toISOString()} - Success: Retrieved projects for user ${userId}`)
 

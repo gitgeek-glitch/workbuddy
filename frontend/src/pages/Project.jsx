@@ -1,17 +1,24 @@
 "use client"
 
-import { useState } from "react"
-import { useSelector } from "react-redux"
+import { useState, useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import { FiPlus, FiFilter, FiSearch, FiClock, FiCheck } from "react-icons/fi"
 import ProjectCard from "../components/projects/ProjectCard"
 import NewProjectForm from "../components/projects/NewProjectForm"
+import { getProjects } from "../store/slices/projectSlice"
 
 const Project = () => {
+  const dispatch = useDispatch()
   const { projects, loading, error } = useSelector((state) => state.projects)
   const [filter, setFilter] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("ongoing") // Default to ongoing projects
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
+
+  // Fetch projects when component mounts
+  useEffect(() => {
+    dispatch(getProjects())
+  }, [dispatch])
 
   if (loading) {
     return (
@@ -34,9 +41,9 @@ const Project = () => {
     .filter((project) => {
       // First filter by ongoing/finished status
       if (activeTab === "ongoing") {
-        return project.status !== "finished"
+        return project.status !== "Finished"
       } else {
-        return project.status === "finished"
+        return project.status === "Finished"
       }
     })
     .filter((project) => {
@@ -53,7 +60,7 @@ const Project = () => {
       (project) =>
         searchTerm === "" ||
         project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase()),
+        (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase())),
     )
     // Sort by deadline (ascending) - projects with no deadline come last
     .sort((a, b) => {
@@ -149,7 +156,7 @@ const Project = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+            <ProjectCard key={project._id} project={project} />
           ))}
         </div>
       )}
