@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import { FiPlus, FiX, FiSearch, FiCalendar, FiUser, FiUsers, FiInfo, FiClock } from "react-icons/fi"
+import { FiPlus, FiX, FiSearch, FiCalendar, FiUser, FiUsers, FiInfo, FiClock, FiShield } from "react-icons/fi"
 import axios from "axios"
 import { addProject } from "../../store/slices/projectSlice"
 import DatePicker from "react-datepicker" // We'll use react-datepicker
@@ -158,7 +158,7 @@ const NewProjectForm = ({ onClose }) => {
       e.preventDefault()
       e.stopPropagation()
     }
-    
+
     setFormData((prev) => ({
       ...prev,
       collaborators: prev.collaborators.filter((collab) => collab._id !== userId),
@@ -169,7 +169,7 @@ const NewProjectForm = ({ onClose }) => {
   const nextStep = (e) => {
     // Prevent form submission
     e.preventDefault()
-    
+
     if (activeStep === 1 && !formData.name.trim()) {
       toast.error("Project name is required")
       return
@@ -183,7 +183,7 @@ const NewProjectForm = ({ onClose }) => {
   const prevStep = (e) => {
     // Prevent form submission
     e.preventDefault()
-    
+
     if (activeStep > 1) {
       setActiveStep(activeStep - 1)
     }
@@ -222,10 +222,15 @@ const NewProjectForm = ({ onClose }) => {
       // Dispatch action to add project to Redux store
       await dispatch(addProject(response.data.data[0]))
 
-      toast.success("Project created successfully!")
+      toast.success("Project created successfully! You are assigned as the Leader.")
 
       // Close modal and navigate to the projects page
       if (onClose) onClose()
+
+      // Optionally navigate to the new project
+      if (response.data.data[0]._id) {
+        navigate(`/projects/${response.data.data[0]._id}`)
+      }
     } catch (error) {
       console.error("Error creating project:", error)
       toast.error(error.response?.data?.message || "Failed to create project. Please try again.")
@@ -341,6 +346,17 @@ const NewProjectForm = ({ onClose }) => {
                 A good description helps team members understand the project's purpose
               </p>
             </div>
+
+            {/* Project Leader Info */}
+            <div className="bg-bg-secondary border border-border rounded-lg p-4 mt-4">
+              <h3 className="text-sm font-medium mb-2 flex items-center">
+                <FiShield className="mr-2 text-accent" /> Project Leadership
+              </h3>
+              <p className="text-xs text-text-secondary">
+                You will be automatically assigned as the project Leader. Leaders can manage members, edit project
+                details, and control project status.
+              </p>
+            </div>
           </div>
         )}
 
@@ -411,8 +427,8 @@ const NewProjectForm = ({ onClose }) => {
                         key={user._id}
                         className="p-3 hover:bg-bg-secondary cursor-pointer flex items-center justify-between border-b border-border last:border-0"
                         onClick={(e) => {
-                          e.preventDefault(); // Prevent form submission
-                          addCollaborator(user, e);
+                          e.preventDefault() // Prevent form submission
+                          addCollaborator(user, e)
                         }}
                       >
                         <div className="flex items-center">
@@ -428,9 +444,9 @@ const NewProjectForm = ({ onClose }) => {
                           type="button" // Important: explicitly set as button type
                           className="text-accent hover:text-accent-dark bg-accent bg-opacity-10 hover:bg-opacity-20 rounded-full p-1.5 transition-colors"
                           onClick={(e) => {
-                            e.preventDefault(); // Prevent form submission
-                            e.stopPropagation(); // Prevent event bubbling
-                            addCollaborator(user, e);
+                            e.preventDefault() // Prevent form submission
+                            e.stopPropagation() // Prevent event bubbling
+                            addCollaborator(user, e)
                           }}
                         >
                           <FiPlus size={16} />
@@ -484,6 +500,22 @@ const NewProjectForm = ({ onClose }) => {
                   <p className="text-sm text-text-secondary">No team members added yet</p>
                 </div>
               )}
+            </div>
+
+            {/* Team Roles Info */}
+            <div className="bg-bg-secondary border border-border rounded-lg p-4 mt-4">
+              <h3 className="text-sm font-medium mb-2 flex items-center">
+                <FiInfo className="mr-2 text-accent" /> Team Roles
+              </h3>
+              <ul className="text-xs text-text-secondary space-y-2">
+                <li>
+                  • <span className="font-medium">You (Leader)</span>: Full control over the project
+                </li>
+                <li>
+                  • <span className="font-medium">Collaborators</span>: Will join as Members and can be promoted later
+                </li>
+                <li>• All members will be notified when they're added to the project</li>
+              </ul>
             </div>
           </div>
         )}

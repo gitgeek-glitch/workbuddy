@@ -59,6 +59,70 @@ export const updateProjectAsync = createAsyncThunk(
   },
 )
 
+// Delete a project
+export const deleteProjectAsync = createAsyncThunk(
+  "projects/deleteProjectAsync",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+
+      await axios.delete(`${API_URL}/api/project/${projectId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      return projectId
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to delete project")
+    }
+  },
+)
+
+// Leave a project
+export const leaveProjectAsync = createAsyncThunk(
+  "projects/leaveProjectAsync",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+
+      await axios.delete(`${API_URL}/api/project/${projectId}/leave`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      return projectId
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to leave project")
+    }
+  },
+)
+
+// Invite members to a project
+export const inviteMembersAsync = createAsyncThunk(
+  "projects/inviteMembersAsync",
+  async ({ projectId, usernames }, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+
+      const response = await axios.post(
+        `${API_URL}/api/project/${projectId}/invite`,
+        { usernames },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      return response.data.data[0]
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to invite members")
+    }
+  },
+)
+
 const projectSlice = createSlice({
   name: "projects",
   initialState,
@@ -164,9 +228,64 @@ const projectSlice = createSlice({
         const index = state.projects.findIndex((p) => p._id === action.payload._id)
         if (index !== -1) {
           state.projects[index] = action.payload
+
+          // Update in starred projects if exists
+          const starredIndex = state.starredProjects.findIndex((p) => p._id === action.payload._id)
+          if (starredIndex !== -1) {
+            state.starredProjects[starredIndex] = action.payload
+          }
+
+          // Update in recent projects if exists
+          const recentIndex = state.recentProjects.findIndex((p) => p._id === action.payload._id)
+          if (recentIndex !== -1) {
+            state.recentProjects[recentIndex] = action.payload
+          }
         }
       })
       .addCase(updateProjectAsync.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload || action.error.message
+      })
+      .addCase(deleteProjectAsync.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(deleteProjectAsync.fulfilled, (state, action) => {
+        state.loading = false
+        state.projects = state.projects.filter((p) => p._id !== action.payload)
+        state.starredProjects = state.starredProjects.filter((p) => p._id !== action.payload)
+        state.recentProjects = state.recentProjects.filter((p) => p._id !== action.payload)
+      })
+      .addCase(deleteProjectAsync.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload || action.error.message
+      })
+      .addCase(leaveProjectAsync.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(leaveProjectAsync.fulfilled, (state, action) => {
+        state.loading = false
+        state.projects = state.projects.filter((p) => p._id !== action.payload)
+        state.starredProjects = state.starredProjects.filter((p) => p._id !== action.payload)
+        state.recentProjects = state.recentProjects.filter((p) => p._id !== action.payload)
+      })
+      .addCase(leaveProjectAsync.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload || action.error.message
+      })
+      .addCase(inviteMembersAsync.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(inviteMembersAsync.fulfilled, (state, action) => {
+        state.loading = false
+        const index = state.projects.findIndex((p) => p._id === action.payload._id)
+        if (index !== -1) {
+          state.projects[index] = action.payload
+        }
+      })
+      .addCase(inviteMembersAsync.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload || action.error.message
       })

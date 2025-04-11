@@ -69,6 +69,13 @@ const Project = () => {
       return new Date(a.deadline) - new Date(b.deadline)
     })
 
+  // Handle project creation success
+  const handleProjectCreated = () => {
+    setShowNewProjectModal(false)
+    // Refresh projects list
+    dispatch(getProjects())
+  }
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -165,7 +172,7 @@ const Project = () => {
       {showNewProjectModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <NewProjectForm onClose={() => setShowNewProjectModal(false)} />
+            <NewProjectForm onClose={() => setShowNewProjectModal(false)} onSuccess={handleProjectCreated} />
           </div>
         </div>
       )}

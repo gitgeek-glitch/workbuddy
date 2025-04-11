@@ -8,6 +8,9 @@ import {
   getProject,
   getUserProjects,
   inviteMembers,
+  leaveProject,
+  deleteProject,
+  updateProject,
 } from "../controllers/project.controller.js"
 import { authenticateJWT } from "../middlewares/auth.middleware.js"
 
@@ -25,6 +28,12 @@ router.get("/user", getUserProjects)
 // Get specific project details
 router.get("/:projectId", getProject)
 
+// Update project
+router.patch("/:projectId", updateProject)
+
+// Delete project
+router.delete("/:projectId", deleteProject)
+
 // Accept project invitation
 router.post("/:projectId/accept", acceptInvitation)
 
@@ -39,5 +48,8 @@ router.delete("/:projectId/members/:memberId", removeMember)
 
 // Invite additional members to a project
 router.post("/:projectId/invite", inviteMembers)
+
+// Leave a project
+router.delete("/:projectId/leave", leaveProject)
 
 export default router

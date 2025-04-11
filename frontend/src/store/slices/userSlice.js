@@ -7,7 +7,8 @@ export const signupUser = createAsyncThunk("user/signup", async (signupData, { r
   try {
     const response = await axios.post(`${API_URL}/api/user/signup`, signupData)
     const { token, user } = response.data.data[0]
-
+    console.log(user);
+    
     // Normalize user data
     const normalizedUser = {
       id: user._id || user.id,
@@ -41,6 +42,8 @@ export const loginUser = createAsyncThunk("user/login", async (credentials, { re
     const { token, user } = response.data.data[0]
 
     console.log("Login response user data:", user)
+    console.log(user);
+    
 
     // Normalize user data
     const normalizedUser = {
@@ -113,12 +116,12 @@ export const checkAuthState = createAsyncThunk("user/checkAuth", async (_, { rej
 export const oauthLogin = createAsyncThunk("user/oauthLogin", async (userData, { rejectWithValue }) => {
   try {
     console.log("OAuth login data received:", userData)
-    console.log(userData);
+    
     
     // The userData should already be normalized by the OAuthCallback component
     // Just ensure we have all required fields with fallbacks
     const normalizedUser = {
-      id: userData._id,
+      id: userData.id,
       fullName: userData.name,
       email: userData.email || "",
       avatar: userData.avatar ,

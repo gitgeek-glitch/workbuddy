@@ -123,6 +123,9 @@ export const updateProject = async (req, res) => {
       })
     }
 
+    // Check if project is being marked as finished
+    const isBeingMarkedAsFinished = updateData.status === "Finished" && project.status !== "Finished"
+
     // Update allowed fields
     if (updateData.name) project.name = updateData.name
     if (updateData.description !== undefined) project.description = updateData.description
@@ -135,12 +138,14 @@ export const updateProject = async (req, res) => {
     // Notify all project members about the update
     for (const member of project.members) {
       if (!member.userId.equals(userId)) {
-        const notification = await createNotification(
-          member.userId,
-          `Project "${project.name}" has been updated`,
-          project._id,
-          "File-Status",
-        )
+        let notificationMessage = `Project "${project.name}" has been updated`
+
+        // Special message for marking as finished
+        if (isBeingMarkedAsFinished) {
+          notificationMessage = `Project "${project.name}" has been marked as finished by ${req.user.username}`
+        }
+
+        const notification = await createNotification(member.userId, notificationMessage, project._id, "File-Status")
 
         // Send real-time notification
         if (notification && global.io && global.userSocketMap) {
@@ -602,7 +607,7 @@ export const inviteMembers = async (req, res) => {
     }
 
     // Find the project
-    const project = await Project.findById(projectId)
+    const project = await Project.findById(projectId).populate("members.userId", "username")
 
     if (!project) {
       return res.status(404).json({
@@ -613,7 +618,7 @@ export const inviteMembers = async (req, res) => {
     }
 
     // Check if user is authorized (Leader or Co-Leader)
-    const userMember = project.members.find((member) => member.userId.equals(userId))
+    const userMember = project.members.find((member) => member.userId._id.equals(userId))
 
     if (!userMember || (userMember.role !== "Leader" && userMember.role !== "Co-Leader")) {
       return res.status(403).json({
@@ -638,6 +643,7 @@ export const inviteMembers = async (req, res) => {
     // Limit invitations to available slots
     const limitedUsernames = usernames.slice(0, availableSlots)
     const newInvitations = []
+    const invitedUsers = []
 
     for (const username of limitedUsernames) {
       // Find user by username
@@ -645,7 +651,7 @@ export const inviteMembers = async (req, res) => {
 
       if (user) {
         // Check if user is already a member
-        const isMember = project.members.some((member) => member.userId.equals(user._id))
+        const isMember = project.members.some((member) => member.userId._id.equals(user._id))
 
         // Check if user is already invited
         const isInvited = project.invitations.some((invitedId) => invitedId.equals(user._id))
@@ -654,6 +660,7 @@ export const inviteMembers = async (req, res) => {
           // Add to invitations
           project.invitations.push(user._id)
           newInvitations.push(user._id)
+          invitedUsers.push(user.username)
 
           // Create notification for the invited user
           const notification = await createNotification(
@@ -673,6 +680,25 @@ export const inviteMembers = async (req, res) => {
 
     await project.save()
 
+    // Notify existing members about new invitations
+    if (newInvitations.length > 0) {
+      for (const member of project.members) {
+        if (!member.userId._id.equals(userId)) {
+          const notification = await createNotification(
+            member.userId._id,
+            `${req.user.username} invited ${invitedUsers.join(", ")} to project "${project.name}"`,
+            project._id,
+            "Role-Change",
+          )
+
+          // Send real-time notification
+          if (notification && global.io && global.userSocketMap) {
+            global.sendNotificationToUser(global.io, global.userSocketMap, member.userId._id, notification)
+          }
+        }
+      }
+    }
+
     logger.info(`${new Date().toISOString()} - Success: Invited ${newInvitations.length} users to project ${projectId}`)
 
     return res.status(200).json({
@@ -682,6 +708,150 @@ export const inviteMembers = async (req, res) => {
     })
   } catch (error) {
     logger.error(`${new Date().toISOString()} - Error: Error inviting members - ${error.message}`)
+    return res.status(500).json({
+      message: "Internal Server Error",
+      data: [],
+      code: 500,
+    })
+  }
+}
+
+// Leave a project
+export const leaveProject = async (req, res) => {
+  try {
+    const { projectId } = req.params
+    const userId = req.user._id
+
+    // Find the project
+    const project = await Project.findById(projectId).populate("members.userId", "username")
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found",
+        data: [],
+        code: 404,
+      })
+    }
+
+    // Check if user is a member
+    const memberIndex = project.members.findIndex((member) => member.userId._id.equals(userId))
+
+    if (memberIndex === -1) {
+      return res.status(403).json({
+        message: "You are not a member of this project",
+        data: [],
+        code: 403,
+      })
+    }
+
+    // Check if user is the leader
+    if (project.members[memberIndex].role === "Leader") {
+      return res.status(400).json({
+        message: "Project leaders cannot leave the project. Transfer leadership first or delete the project.",
+        data: [],
+        code: 400,
+      })
+    }
+
+    // Get user info before removing
+    const leavingMember = project.members[memberIndex]
+
+    // Remove the member
+    project.members.splice(memberIndex, 1)
+    await project.save()
+
+    // Create notification for all remaining project members
+    for (const member of project.members) {
+      const notification = await createNotification(
+        member.userId._id,
+        `${req.user.username} has left the project "${project.name}"`,
+        project._id,
+        "Role-Change",
+      )
+
+      // Send real-time notification
+      if (notification && global.io && global.userSocketMap) {
+        global.sendNotificationToUser(global.io, global.userSocketMap, member.userId._id, notification)
+      }
+    }
+
+    logger.info(`${new Date().toISOString()} - Success: User ${userId} left project ${projectId}`)
+
+    return res.status(200).json({
+      message: "Successfully left the project",
+      data: [],
+      code: 200,
+    })
+  } catch (error) {
+    logger.error(`${new Date().toISOString()} - Error: Error leaving project - ${error.message}`)
+    return res.status(500).json({
+      message: "Internal Server Error",
+      data: [],
+      code: 500,
+    })
+  }
+}
+
+// Delete a project
+export const deleteProject = async (req, res) => {
+  try {
+    const { projectId } = req.params
+    const userId = req.user._id
+
+    // Find the project
+    const project = await Project.findById(projectId).populate("members.userId", "username")
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found",
+        data: [],
+        code: 404,
+      })
+    }
+
+    // Check if user is the leader
+    const userMember = project.members.find((member) => member.userId._id.equals(userId))
+
+    if (!userMember || userMember.role !== "Leader") {
+      return res.status(403).json({
+        message: "Only the project leader can delete the project",
+        data: [],
+        code: 403,
+      })
+    }
+
+    // Store member IDs before deleting for notifications
+    const memberIds = project.members
+      .filter((member) => !member.userId._id.equals(userId))
+      .map((member) => member.userId._id)
+
+    // Delete the project
+    await Project.findByIdAndDelete(projectId)
+
+    // Create notification for all project members except the leader
+    for (const memberId of memberIds) {
+      const notification = await createNotification(
+        memberId,
+        `Project "${project.name}" has been deleted by ${req.user.username}`,
+        null, // No project ID since it's deleted
+        "File-Status",
+      )
+
+      // Send real-time notification
+      if (notification && global.io && global.userSocketMap) {
+        global.sendNotificationToUser(global.io, global.userSocketMap, memberId, notification)
+      }
+    }
+
+    logger.info(`${new Date().toISOString()} - Success: Project ${projectId} deleted by user ${userId}`)
+
+    return res.status(200).json({
+      message: "Project deleted successfully",
+      data: [],
+      code: 200,
+    })
+  } catch (error) {
+    logger.error(`${new Date().toISOString()} - Error: Error deleting project - ${error.message}`)
     return res.status(500).json({
       message: "Internal Server Error",
       data: [],
