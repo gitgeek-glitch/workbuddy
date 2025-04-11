@@ -1,7 +1,3 @@
-- Add back to home button on login and sign up
-- Let user know that Username len should be min 3 
-- Remove dots from password input field and let user know min 8 len password
-- After signup / login, redirect to dashboard
-- When I click on chats, the side pannel is not highlighting the chat like it does for dashboard
-
-- Dashboard responsiveness is not proper
+- Don't allow to send invite to members who have already joined the project
+- Allow maximum 3 invites per user in a week
+- If a member leaves, allow leader to invite him again
