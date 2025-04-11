@@ -53,15 +53,15 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-10 bg-bg-secondary border-b border-border/30 transition-all duration-200 ${
-          scrolled ? "py-2" : "py-3"
+        className={`fixed top-0 left-0 right-0 z-20 bg-bg-secondary backdrop-blur-lg border-b border-border transition-all duration-300 ${
+          scrolled ? "py-2 shadow-md" : "py-3"
         } px-4 md:px-6 lg:px-12`}
       >
         <div className="flex items-center justify-between">
           {/* Mobile menu button (only visible on mobile) */}
           <div className="flex items-center lg:hidden">
             <button
-              className="p-2 rounded-md hover:bg-bg-primary/80 text-text-primary"
+              className="p-2 rounded-full hover:bg-bg-primary text-text-primary transition-all duration-200"
               onClick={() => dispatch(setMobileMenuOpen(true))}
               aria-label="Toggle mobile menu"
             >
@@ -75,7 +75,7 @@ const Navbar = () => {
             {isAuthenticated && isDashboardRoute() && (
               <button
                 onClick={() => dispatch(toggleSidebar())}
-                className="hidden lg:flex p-2 mr-4 rounded-full bg-bg-primary/80 hover:bg-bg-primary text-text-secondary hover:text-accent transition-all duration-300 ease-in-out transform hover:scale-105"
+                className="hidden lg:flex p-2 mr-4 rounded-full bg-bg-primary hover:bg-bg-primary text-text-secondary hover:text-accent transition-all duration-300 ease-in-out transform hover:scale-105"
                 aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
                 <FiChevronLeft
@@ -86,23 +86,23 @@ const Navbar = () => {
             )}
 
             {/* Logo - always visible */}
-            <Link to="/" className="flex items-center space-x-2 mr-8">
-              <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white font-bold">
+            <Link to="/" className="flex items-center space-x-3 mr-8">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-md">
                 TC
               </div>
-              <span className="font-bold text-lg">TeamCollab</span>
+              <span className="font-bold text-xl">TeamCollab</span>
             </Link>
 
             {/* Desktop navigation */}
             {isAuthenticated && (
-              <div className="hidden lg:flex space-x-1">
+              <div className="hidden lg:flex space-x-2">
                 {navigationLinks.map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                       isActivePath(link.to)
-                        ? "bg-bg-primary text-text-primary"
+                        ? "bg-bg-primary text-accent"
                         : "text-text-secondary hover:bg-bg-primary hover:text-text-primary"
                     }`}
                   >
@@ -114,7 +114,7 @@ const Navbar = () => {
           </div>
 
           {/* Right side items */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <ThemeToggle />
 
             {isAuthenticated ? (
@@ -132,7 +132,7 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to="/signup"
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                 >
                   Sign up
                 </Link>

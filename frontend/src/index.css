@@ -45,15 +45,15 @@ code {
 /* Button styles */
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover transition-colors;
+    @apply px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors shadow-md;
   }
 
   .btn-secondary {
-    @apply bg-bg-secondary text-text-primary border border-border px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors;
+    @apply bg-bg-secondary text-text-primary border border-border px-4 py-2 rounded-xl hover:bg-opacity-90 transition-colors;
   }
 
   .btn-outline {
-    @apply border border-border hover:border-accent text-text-primary font-medium rounded-md px-6 py-3 transition-colors duration-200 flex items-center justify-center;
+    @apply border border-border hover:border-accent text-text-primary font-medium rounded-xl px-6 py-3 transition-colors duration-200 flex items-center justify-center;
   }
 
   .btn-icon {
@@ -61,39 +61,39 @@ code {
   }
 
   .card {
-    @apply bg-bg-secondary border border-border rounded-md p-4 transition-colors duration-200;
+    @apply bg-bg-secondary border border-border rounded-xl p-4 transition-colors duration-200 shadow-sm;
   }
 
   .input {
-    @apply bg-bg-secondary border border-border rounded-md px-3 py-2 text-text-primary focus:outline-none focus:ring-1 focus:ring-accent transition-colors duration-200;
+    @apply bg-bg-secondary border border-border rounded-xl px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-colors duration-200;
   }
 
   /* Navbar styles */
   .navbar {
-    @apply sticky top-0 z-10 bg-bg-secondary border-b border-border flex items-center justify-between px-4 py-2;
+    @apply sticky top-0 z-10 bg-bg-secondary backdrop-blur-lg border-b border-border flex items-center justify-between px-4 py-2;
     transition: box-shadow 0.3s ease;
   }
-  
+
   .navbar-scrolled {
     @apply shadow-md;
   }
-  
+
   /* Navigation links */
   .navbar-link {
-    @apply px-3 py-2 text-sm font-medium rounded-md transition-colors;
+    @apply px-3 py-2 text-sm font-medium rounded-xl transition-colors;
   }
-  
+
   .navbar-link-active {
-    @apply bg-accent bg-opacity-10 text-accent;
+    @apply bg-bg-primary text-accent;
   }
-  
+
   .navbar-link-inactive {
     @apply text-text-secondary hover:text-text-primary hover:bg-bg-primary;
   }
 
   /* Sidebar styles */
   .sidebar {
-    @apply bg-bg-secondary border-r border-border transition-all duration-300 ease-in-out hidden lg:block relative;
+    @apply bg-bg-secondary backdrop-blur-lg border-r border-border transition-all duration-300 ease-in-out hidden lg:block relative;
   }
 
   .sidebar-header {
@@ -101,11 +101,11 @@ code {
   }
 
   .sidebar-link {
-    @apply flex items-center space-x-3 px-3 py-2 rounded-md transition-colors duration-200;
+    @apply flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200;
   }
 
   .sidebar-link-active {
-    @apply bg-accent bg-opacity-5 text-accent;
+    @apply bg-bg-primary text-accent;
   }
 
   .sidebar-link-inactive {
@@ -113,46 +113,17 @@ code {
   }
 
   .sidebar-section {
-    @apply flex items-center justify-between w-full px-3 py-2 rounded-md transition-colors duration-200;
+    @apply flex items-center justify-between w-full px-4 py-3 rounded-xl transition-colors duration-200;
   }
 
   /* Feature card styles */
   .feature-card {
-    @apply bg-bg-secondary p-6 rounded-lg border border-border hover:border-accent transition-colors duration-300;
+    @apply bg-bg-secondary p-6 rounded-xl border border-border hover:border-accent transition-colors duration-300 shadow-sm;
   }
 
   .feature-icon {
-    @apply w-12 h-12 rounded-lg bg-accent bg-opacity-10 flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-all duration-300;
+    @apply w-12 h-12 rounded-xl bg-bg-primary flex items-center justify-center mb-4 group-hover:bg-bg-primary transition-all duration-300;
   }
-
-  /* Search component */
-.search-container {
-  @apply relative flex items-center;
-}
-
-.search-icon-btn {
-  @apply p-2 rounded-full text-text-secondary hover:bg-bg-primary hover:text-text-primary transition-colors;
-}
-
-.search-input-container {
-  @apply relative overflow-hidden transition-all duration-300 ease-in-out;
-}
-
-.search-input {
-  @apply w-full bg-bg-primary border border-border rounded-md py-1.5 pl-10 pr-8 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent focus:ring-opacity-50;
-}
-
-.search-icon {
-  @apply absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary;
-}
-
-.search-shortcut {
-  @apply absolute right-8 top-1/2 -translate-y-1/2 text-xs text-text-secondary opacity-50;
-}
-
-.search-close-btn {
-  @apply absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary p-1;
-}
 
   /* Dropdown styles */
   .dropdown-container {
@@ -160,11 +131,11 @@ code {
   }
 
   .dropdown-menu {
-    @apply absolute z-30 mt-2 bg-bg-secondary rounded-md shadow-lg border border-border;
+    @apply absolute z-30 mt-2 bg-bg-secondary rounded-xl shadow-lg border border-border;
   }
 
   .dropdown-item {
-    @apply block w-full text-left px-4 py-2 text-sm hover:bg-bg-primary transition-colors;
+    @apply block w-full text-left px-4 py-2 text-sm hover:bg-bg-primary transition-colors rounded-lg mx-1;
   }
 
   /* Section styles */
@@ -361,17 +332,17 @@ code {
 
 /* Gradient text */
 .gradient-text {
-  @apply bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent;
 }
 
 /* Tooltip styles */
 .tooltip {
-  @apply absolute bg-bg-secondary border border-border rounded-md px-3 py-2 whitespace-nowrap z-10 shadow-lg animate-in fade-in slide-in-from-left-5 duration-200;
+  @apply absolute bg-bg-secondary border border-border rounded-xl px-3 py-2 whitespace-nowrap z-10 shadow-lg animate-in fade-in slide-in-from-left-5 duration-200;
 }
 
 /* Glass effect */
 .glass {
-  @apply backdrop-blur-md bg-opacity-80;
+  @apply backdrop-blur-lg bg-opacity-80;
 }
 
 /* Transitions */
@@ -413,45 +384,45 @@ code {
 }
 
 .progress-bar-fill {
-  @apply bg-accent h-2.5 rounded-full transition-all duration-500 ease-in-out;
+  @apply bg-blue-500 h-2.5 rounded-full transition-all duration-500 ease-in-out;
 }
 
 /* Dashboard card hover effects */
 .dashboard-card {
-  @apply transition-all duration-300 hover:shadow-md hover:border-accent hover:border-opacity-30;
+  @apply transition-all duration-300 hover:shadow-md hover:border-accent hover:-translate-y-1;
 }
 
 /* Team member avatar styling */
 .team-avatar {
-  @apply w-10 h-10 rounded-full bg-accent bg-opacity-20 flex items-center justify-center text-accent font-medium;
+  @apply w-10 h-10 rounded-xl bg-bg-primary flex items-center justify-center text-accent font-medium;
 }
 
 /* Stats card hover effect */
 .stats-card {
-  @apply hover:bg-bg-primary hover:bg-opacity-50 transition-all duration-300;
+  @apply hover:bg-bg-primary hover:-translate-y-1 transition-all duration-300;
 }
 
 /* Stats icon container */
 .stats-icon {
-  @apply p-2 bg-accent bg-opacity-10 rounded-full;
+  @apply p-3 bg-bg-primary rounded-xl;
 }
 
 /* Project status badges */
 .status-badge {
-  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
 }
 
 .status-badge-ongoing {
-  @apply bg-accent text-accent bg-opacity-10;
+  @apply bg-bg-primary text-accent;
 }
 
 .status-badge-finished {
-  @apply bg-success text-success bg-opacity-10;
+  @apply bg-bg-primary text-success;
 }
 
 /* Notification styles */
 .notification-item {
-  @apply p-4 hover:bg-bg-primary hover:bg-opacity-50 transition-colors cursor-pointer;
+  @apply p-4 hover:bg-bg-primary transition-colors cursor-pointer rounded-xl;
 }
 
 .notification-item-unread {
@@ -459,11 +430,11 @@ code {
 }
 
 .notification-icon {
-  @apply w-10 h-10 rounded-full flex items-center justify-center;
+  @apply w-10 h-10 rounded-xl flex items-center justify-center;
 }
 
 .notification-icon-unread {
-  @apply bg-accent text-accent bg-opacity-10;
+  @apply bg-bg-primary text-accent;
 }
 
 .notification-icon-read {
@@ -487,7 +458,6 @@ code {
   @apply border-transparent hover:text-accent;
 }
 
-/* Project section tabs */
 /* Input focus styles */
 input:focus,
 textarea:focus,
@@ -495,111 +465,90 @@ select:focus {
   @apply ring-2 ring-accent border-transparent outline-none transition-all duration-200;
 }
 
-/* Card hover effects */
-.project-card {
-  @apply transition-all duration-300;
-}
-
-.project-card:hover {
-  @apply shadow-md transform translate-y-[-2px];
-}
-
-/* Animation for delete and finish buttons */
-/* @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.action-button {
-  animation: fadeIn 0.2s ease-out;
-} */
-
-/* Calendar customization */
-/* .react-datepicker {
-  @apply border border-border bg-bg-primary shadow-lg rounded-md !important;
-}
-
-.react-datepicker__header {
-  @apply bg-bg-secondary border-border border-b !important;
-}
-
-.react-datepicker__day--selected {
-  @apply bg-accent text-white !important;
-}
-
-.react-datepicker__day:hover {
-  @apply bg-accent bg-opacity-10 !important;
-}
-
-.react-datepicker__day--keyboard-selected {
-  @apply bg-accent bg-opacity-20 !important;
-} */
-
-/* Deadline styling */
-/* .deadline-soon {
-  @apply text-danger font-medium;
-} */
-
-/* Project card action buttons */
-/* .project-action-buttons {
-  @apply opacity-0 group-hover:opacity-100 transition-opacity duration-200;
-} */
-
-/* Form step transitions */
-/* .form-step {
-  @apply transition-all duration-300 ease-in-out;
-}
-
-.form-step-enter {
-  @apply opacity-0 transform translate-x-4;
-}
-
-.form-step-enter-active {
-  @apply opacity-100 transform translate-x-0;
-}
-
-.form-step-exit {
-  @apply opacity-100 transform translate-x-0;
-}
-
-.form-step-exit-active {
-  @apply opacity-0 transform -translate-x-4;
-}
-
-.project-tab {
-  @apply flex items-center px-4 py-2 border-b-2 transition-colors;
-}
-
-.project-tab-active {
-  @apply border-accent text-accent;
-}
-
-.project-tab-inactive {
-  @apply border-transparent hover:text-accent;
-} */
-
-
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--color-bg-primary);
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-secondary);
+}
+
+/* Button hover effects */
+.btn-hover-slide {
+  @apply relative overflow-hidden;
+}
+
+.btn-hover-slide::after {
+  content: "";
+  @apply absolute inset-0 bg-white bg-opacity-20 transform -translate-x-full transition-transform duration-300;
+}
+
+.btn-hover-slide:hover::after {
+  @apply translate-x-0;
+}
+
+/* Glassmorphism effects */
+.glassmorphism {
+  @apply bg-bg-secondary bg-opacity-80 backdrop-blur-lg border border-white border-opacity-10 shadow-lg;
+}
+
+/* Hover card effect */
+.hover-card {
+  @apply transition-all duration-300;
+}
+
+.hover-card:hover {
+  @apply transform -translate-y-1 shadow-lg;
+}
+
+/* Gradient borders */
+.gradient-border {
+  position: relative;
+  @apply rounded-xl overflow-hidden;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  @apply bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl;
+  padding: 1px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Animated icons */
+.icon-animated {
+  @apply transition-transform duration-300;
+}
+
+.icon-animated:hover {
+  @apply transform scale-110;
+}
+
+/* Navbar item hover effect */
+.nav-item-hover {
+  @apply relative overflow-hidden;
+}
+
+.nav-item-hover::after {
+  content: "";
+  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-300;
+}
+
+.nav-item-hover:hover::after {
+  @apply w-full;
 }

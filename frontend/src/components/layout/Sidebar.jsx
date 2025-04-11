@@ -70,15 +70,58 @@ const Sidebar = () => {
     setProjectMenuOpen(null)
   }
 
+  const NavItem = ({ to, icon: Icon, label }) => (
+    <Link
+      to={to}
+      className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-300 group overflow-hidden ${
+        isActive(to)
+          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium shadow-md"
+          : "hover:bg-bg-primary text-text-primary"
+      }`}
+      onMouseEnter={() => setHoveredItem(label.toLowerCase())}
+      onMouseLeave={() => setHoveredItem(null)}
+    >
+      <div
+        className={`flex items-center justify-center w-10 h-10 rounded-xl ${
+          isActive(to)
+            ? "bg-white bg-opacity-20 text-white"
+            : "bg-bg-primary text-text-secondary group-hover:text-accent"
+        } transition-all duration-300`}
+      >
+        <Icon size={18} />
+      </div>
+      <span
+        className={`ml-3 relative z-10 transition-all duration-300 ${
+          sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+        }`}
+      >
+        {label}
+      </span>
+
+      {sidebarCollapsed && hoveredItem === label.toLowerCase() && (
+        <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-lg shadow-lg min-w-max z-50 border border-border animate-in fade-in slide-in-from-left-5 duration-200">
+          {label}
+        </div>
+      )}
+    </Link>
+  )
+
   return (
     <aside
       ref={sidebarRef}
-      className={`sidebar fixed h-screen bg-gradient-to-b from-bg-secondary/80 to-bg-secondary backdrop-blur-md transition-all duration-300 ease-in-out border-r border-border/30 ${
-        sidebarCollapsed ? "w-20" : "w-72"
+      className={`sidebar fixed h-screen bg-bg-secondary backdrop-blur-lg transition-all duration-300 ease-in-out border-r border-border ${
+        sidebarCollapsed ? "w-[5.5rem]" : "w-72"
       } z-10`}
     >
-      <div className="sidebar-header px-4 h-16 flex items-center justify-between border-b border-border/20">
-        {/* Empty header - toggle button moved to navbar */}
+      <div className="sidebar-header px-4 h-16 flex items-center justify-between border-b border-border">
+        {!sidebarCollapsed && (
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-md">
+              TC
+            </div>
+            <span className="font-bold text-lg">TeamCollab</span>
+          </div>
+        )}
       </div>
 
       <nav
@@ -86,191 +129,15 @@ const Sidebar = () => {
           sidebarCollapsed ? "overflow-x-hidden" : ""
         }`}
       >
-        <ul className="space-y-2 py-2">
-          <li>
-            <Link
-              to="/dashboard"
-              className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
-                isActive("/dashboard")
-                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20"
-                  : "hover:bg-bg-primary/80 text-text-primary"
-              }`}
-              onMouseEnter={() => setHoveredItem("dashboard")}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              {isActive("/dashboard") && (
-                <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
-              )}
-              <FiHome
-                size={20}
-                className={`flex-shrink-0 relative z-10 ${
-                  isActive("/dashboard") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
-                }`}
-              />
-              <span
-                className={`ml-3 relative z-10 transition-all duration-200 ${
-                  sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                }`}
-              >
-                Dashboard
-              </span>
+        <div className="space-y-2 py-3">
+          <NavItem to="/dashboard" icon={FiHome} label="Dashboard" />
+          <NavItem to="/dashboard/projects" icon={FiFolder} label="Projects" />
+          <NavItem to="/dashboard/chat" icon={FiMessageSquare} label="Chat" />
+          <NavItem to="/team" icon={FiUsers} label="Team" />
+        </div>
 
-              {sidebarCollapsed && hoveredItem === "dashboard" && (
-                <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
-                  Dashboard
-                </div>
-              )}
-            </Link>
-          </li>
-
-          {/* Projects Link */}
-          <li>
-            <Link
-              to="/dashboard/projects"
-              className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
-                isActive("/dashboard/projects")
-                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20"
-                  : "hover:bg-bg-primary/80 text-text-primary"
-              }`}
-              onMouseEnter={() => setHoveredItem("projects-page")}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              {isActive("/dashboard/projects") && (
-                <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
-              )}
-              <FiFolder
-                size={20}
-                className={`flex-shrink-0 relative z-10 ${
-                  isActive("/dashboard/projects") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
-                }`}
-              />
-              <span
-                className={`ml-3 relative z-10 transition-all duration-200 ${
-                  sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                }`}
-              >
-                Projects
-              </span>
-
-              {sidebarCollapsed && hoveredItem === "projects-page" && (
-                <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
-                  Projects
-                </div>
-              )}
-            </Link>
-          </li>
-
-          <li className="mt-2">
-            <Link
-              to="/dashboard/chat"
-              className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
-                isActive("/dashboard/chat")
-                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20"
-                  : "hover:bg-bg-primary/80 text-text-primary"
-              }`}
-              onMouseEnter={() => setHoveredItem("chat")}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              {isActive("/dashboard/chat") && (
-                <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
-              )}
-              <FiMessageSquare
-                size={20}
-                className={`flex-shrink-0 relative z-10 ${
-                  isActive("/dashboard/chat") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
-                }`}
-              />
-              <span
-                className={`ml-3 relative z-10 transition-all duration-200 ${
-                  sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                }`}
-              >
-                Chat
-              </span>
-
-              {sidebarCollapsed && hoveredItem === "chat" && (
-                <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
-                  Chat
-                </div>
-              )}
-            </Link>
-          </li>
-
-          <li className="mt-2">
-            <Link
-              to="/team"
-              className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
-                isActive("/team")
-                  ? "bg-accent text-white font-medium shadow-md shadow-accent/20"
-                  : "hover:bg-bg-primary/80 text-text-primary"
-              }`}
-              onMouseEnter={() => setHoveredItem("team")}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              {isActive("/team") && (
-                <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
-              )}
-              <FiUsers
-                size={20}
-                className={`flex-shrink-0 relative z-10 ${
-                  isActive("/team") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
-                }`}
-              />
-              <span
-                className={`ml-3 relative z-10 transition-all duration-200 ${
-                  sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                }`}
-              >
-                Team
-              </span>
-
-              {sidebarCollapsed && hoveredItem === "team" && (
-                <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
-                  Team
-                </div>
-              )}
-            </Link>
-          </li>
-        </ul>
-
-        <div className="mt-8 pt-6 border-t border-border/20">
-          <ul className="space-y-2 py-2">
-            <li>
-              <Link
-                to="/dashboard/profile"
-                className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-200 group overflow-hidden ${
-                  isActive("/profile")
-                    ? "bg-accent text-white font-medium shadow-md shadow-accent/20"
-                    : "hover:bg-bg-primary/80 text-text-primary"
-                }`}
-                onMouseEnter={() => setHoveredItem("profile")}
-                onMouseLeave={() => setHoveredItem(null)}
-              >
-                {isActive("/profile") && (
-                  <span className="absolute inset-0 bg-gradient-to-r from-accent to-accent/80 opacity-100"></span>
-                )}
-                <FiSettings
-                  size={20}
-                  className={`flex-shrink-0 relative z-10 ${
-                    isActive("/profile") ? "text-white" : sidebarCollapsed ? "text-text-secondary" : ""
-                  }`}
-                />
-                <span
-                  className={`ml-3 relative z-10 transition-all duration-200 ${
-                    sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                  }`}
-                >
-                  Profile
-                </span>
-
-                {sidebarCollapsed && hoveredItem === "profile" && (
-                  <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-md shadow-lg min-w-max z-50">
-                    Profile
-                  </div>
-                )}
-              </Link>
-            </li>
-          </ul>
+        <div className="mt-8 pt-6 border-t border-border">
+          <NavItem to="/dashboard/profile" icon={FiSettings} label="Profile" />
         </div>
       </nav>
     </aside>
