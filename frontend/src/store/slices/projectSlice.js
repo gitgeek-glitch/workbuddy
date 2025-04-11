@@ -158,6 +158,11 @@ const projectSlice = createSlice({
       const { id, projectData } = action.payload
       const projectIndex = state.projects.findIndex((project) => project._id === id)
       if (projectIndex !== -1) {
+        // If marking as finished, remove important flag
+        if (projectData.status === "Finished") {
+          projectData.important = false
+        }
+
         state.projects[projectIndex] = { ...state.projects[projectIndex], ...projectData }
 
         // Also update in starred and recent projects if present
@@ -170,6 +175,18 @@ const projectSlice = createSlice({
         if (recentIndex !== -1) {
           state.recentProjects[recentIndex] = { ...state.recentProjects[recentIndex], ...projectData }
         }
+
+        // Make API call to update the project
+        const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+        axios
+          .patch(`${API_URL}/api/project/${id}`, projectData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .catch((error) => {
+            console.error("Error updating project:", error)
+          })
       }
     },
     toggleProjectImportant: (state, action) => {
@@ -177,6 +194,11 @@ const projectSlice = createSlice({
       const projectIndex = state.projects.findIndex((project) => project._id === projectId)
 
       if (projectIndex !== -1) {
+        // Don't allow toggling important for finished projects
+        if (state.projects[projectIndex].status === "Finished") {
+          return
+        }
+
         const currentImportant = state.projects[projectIndex].important || false
         state.projects[projectIndex].important = !currentImportant
 
@@ -190,6 +212,22 @@ const projectSlice = createSlice({
         if (recentIndex !== -1) {
           state.recentProjects[recentIndex].important = !currentImportant
         }
+
+        // Update the project on the server
+        const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+        axios
+          .patch(
+            `${API_URL}/api/project/${projectId}`,
+            { important: !currentImportant },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          )
+          .catch((error) => {
+            console.error("Error updating project importance:", error)
+          })
       }
     },
   },
