@@ -149,7 +149,7 @@ const ProjectCard = ({ project }) => {
 
   // Handle toggling important status
   const handleToggleImportant = () => {
-    if (!isLeader || project.status === "Finished") return
+    if (project.status === "Finished") return
     dispatch(toggleProjectImportant(project._id))
   }
 
@@ -182,7 +182,7 @@ const ProjectCard = ({ project }) => {
       <div className="flex justify-between items-start mb-2">
         <div className="flex items-center">
           <h3 className="text-lg font-semibold">{project.name}</h3>
-          {isLeader && project.status !== "Finished" && (
+          {project.status !== "Finished" && (
             <button
               onClick={handleToggleImportant}
               className="ml-1 p-1 hover:bg-bg-primary rounded-full transition-colors"
