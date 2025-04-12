@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import {
-  FiCheckCircle,
   FiClock,
   FiStar,
   FiTrash2,
@@ -13,6 +12,7 @@ import {
   FiUserPlus,
   FiLogOut,
   FiRefreshCw,
+  FiUsers,
 } from "react-icons/fi"
 import {
   updateProject,
@@ -311,14 +311,20 @@ const ProjectCard = ({ project }) => {
         </div>
       )}
 
-      <div className="flex justify-between items-center mt-3">
-        <button onClick={() => navigate(`/projects/${project._id}`)} className="btn-primary btn-sm">
+      <div className="flex flex-col space-y-2 mt-3">
+        <button onClick={() => navigate(`/projects/${project._id}`)} className="btn-primary btn-sm w-full">
           View Project
         </button>
+        <button
+          onClick={() => navigate(`/team/${project._id}`)}
+          className="btn-secondary btn-sm w-full flex items-center justify-center"
+        >
+          <FiUsers className="mr-1" /> View Team
+        </button>
+      </div>
 
-        <div className="text-xs text-text-secondary">
-          {project.members?.length || 0} member{project.members?.length !== 1 ? "s" : ""}
-        </div>
+      <div className="text-xs text-text-secondary text-right mt-2">
+        {project.members?.length || 0} member{project.members?.length !== 1 ? "s" : ""}
       </div>
 
       {/* Add Collaborators Modal */}

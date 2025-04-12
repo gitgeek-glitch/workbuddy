@@ -17,6 +17,8 @@ import Layout from "./components/layout/Layout"
 import Landing from "./pages/Landing"
 import Dashboard from "./pages/Dashboard"
 import Project from "./pages/Project"
+import Team from "./pages/Team"
+import TeamDetails from "./pages/TeamDetails"
 import ProjectDetails from "./pages/ProjectDetails"
 import Chat from "./pages/Chat"
 import Profile from "./pages/Profile"
@@ -84,6 +86,12 @@ const AppContent = () => {
         </Route>
         <Route path="/dashboard/projects" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
           <Route index element={<Project />} />
+        </Route>
+        <Route path="/team" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
+          <Route index element={<Team />} />
+        </Route>
+        <Route path="/team/:id" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
+          <Route index element={<TeamDetails />} />
         </Route>
         <Route path="/dashboard/notifications" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
           <Route index element={<Notifications />} />
