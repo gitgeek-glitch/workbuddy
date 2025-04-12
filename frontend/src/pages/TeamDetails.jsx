@@ -3,12 +3,22 @@
 import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
-import { FiPlus, FiFilter, FiSearch, FiClock, FiCheck } from "react-icons/fi"
-import axios from "axios"
 import { toast } from "react-toastify"
-import { FiArrowLeft, FiMoreVertical, FiCalendar } from "react-icons/fi"
+import axios from "axios"
 import { getProjects } from "../store/slices/projectSlice"
 import ConfirmationDialog from "../components/ui/ConfirmationDialog"
+import { 
+  FiArrowLeft, 
+  FiMoreHorizontal, 
+  FiCalendar, 
+  FiClock, 
+  FiCheck, 
+  FiUsers, 
+  FiStar,
+  FiArrowUp,
+  FiArrowDown,
+  FiUserX
+} from "react-icons/fi"
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:7000"
 
@@ -30,8 +40,13 @@ const TeamDetails = () => {
   })
   const menuRef = useRef(null)
 
-  // Check if current user is a leader
-  const isLeader = project?.members?.some((member) => member.userId._id === currentUser?.id && member.role === "Leader")
+  // Check user roles
+  const isLeader = project?.members?.some(
+    (member) => member.userId._id === currentUser?.id && member.role === "Leader"
+  )
+  const isCoLeader = project?.members?.some(
+    (member) => member.userId._id === currentUser?.id && member.role === "Co-Leader"
+  )
 
   // Fetch project details
   useEffect(() => {
@@ -77,7 +92,7 @@ const TeamDetails = () => {
 
   // Handle promoting member to co-leader
   const handlePromoteToColeader = (memberId, memberName) => {
-    if (!isLeader) return
+    if (!isLeader && !isCoLeader) return
 
     setConfirmDialog({
       isOpen: true,
@@ -111,7 +126,7 @@ const TeamDetails = () => {
     })
   }
 
-  // Handle demoting co-leader to member
+  // Handle demoting co-leader to member (only Leader can do this)
   const handleDemoteToMember = (memberId, memberName) => {
     if (!isLeader) return
 
@@ -184,35 +199,84 @@ const TeamDetails = () => {
     return date.toLocaleDateString()
   }
 
+  // Get status badge class
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case "Finished":
+        return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+      case "In Progress":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+      case "Planning":
+        return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+      default:
+        return "bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400"
+    }
+  }
+
   // Get role badge class
   const getRoleBadgeClass = (role) => {
     switch (role) {
       case "Leader":
-        return "text-green-500"
+        return "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"
       case "Co-Leader":
-        return "text-orange-500"
+        return "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800"
       default:
-        return "text-black"
+        return "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700"
     }
+  }
+
+  // Generate initials from name
+  const getInitials = (name) => {
+    if (!name) return "U";
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+  
+  // Get random color for avatar based on string
+  const getAvatarColor = (string) => {
+    const colors = [
+      "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+      "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+      "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+      "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
+      "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
+      "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+      "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
+    ];
+    
+    const stringValue = string ? string.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : 0;
+    return colors[stringValue % colors.length];
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full min-h-[70vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
       </div>
     )
   }
 
   if (error) {
-    return <div className="bg-danger/10 border border-danger/30 text-danger rounded-lg p-4 my-4">Error: {error}</div>
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 my-4 shadow-sm dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+        Error: {error}
+      </div>
+    )
   }
 
   if (!project) {
     return (
-      <div className="bg-bg-secondary border border-border rounded-lg p-8 text-center">
+      <div className="bg-bg-secondary border border-border rounded-xl p-8 text-center shadow-sm">
         <h3 className="text-lg font-medium mb-2">Project not found</h3>
-        <button className="btn-primary mt-4" onClick={() => navigate("/team")}>
+        <button 
+          className="mt-4 bg-accent text-white px-4 py-2 rounded-md hover:bg-accent/90 transition-colors"
+          onClick={() => navigate("/team")}
+        >
           Back to Team
         </button>
       </div>
@@ -220,137 +284,154 @@ const TeamDetails = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex items-center mb-6">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="flex items-center mb-8">
         <button
           onClick={() => navigate("/team")}
-          className="mr-4 p-2 rounded-full hover:bg-bg-primary transition-colors"
+          className="mr-4 p-2 rounded-full hover:bg-bg-primary transition-colors flex items-center justify-center bg-bg-secondary border border-border"
+          aria-label="Back to team"
         >
-          <FiArrowLeft size={20} />
+          <FiArrowLeft size={18} />
         </button>
-        <h1 className="text-2xl font-bold">{project.name} - Team</h1>
+        <h1 className="text-2xl font-bold">{project.name}</h1>
       </div>
 
       {/* Project info card */}
-      <div className="bg-bg-secondary border border-border rounded-xl p-6 mb-8 animate-in fade-in duration-300">
-        <div className="flex flex-col md:flex-row justify-between">
-          <div>
-            <h2 className="text-xl font-semibold mb-2">{project.name}</h2>
-            <p className="text-text-secondary mb-4">{project.description}</p>
+      <div className="bg-bg-secondary border border-border rounded-xl p-6 mb-8 shadow-sm transition-all hover:shadow-md">
+        <div className="flex flex-col lg:flex-row justify-between">
+          <div className="flex-1">
+            <div className="flex items-center space-x-2 mb-2">
+              <h2 className="text-xl font-semibold">{project.name}</h2>
+              {project.important && <FiStar className="text-yellow-500" size={18} />}
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(project.status)}`}>
+                {project.status === "Finished" ? (
+                  <span className="flex items-center">
+                    <FiCheck className="mr-1" size={12} />
+                    {project.status}
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    <FiClock className="mr-1" size={12} />
+                    {project.status}
+                  </span>
+                )}
+              </span>
+            </div>
+            <p className="text-text-secondary mb-4 max-w-3xl">{project.description}</p>
+          </div>
+          <div className="mt-4 lg:mt-0 lg:ml-6 flex flex-col items-start lg:items-end">
+            <div className="flex items-center text-sm text-text-secondary">
+              <FiUsers className="mr-2" />
+              <span>{members.length} team member{members.length !== 1 ? "s" : ""}</span>
+            </div>
             {project.deadline && project.status !== "Finished" && (
-              <div className="flex items-center text-sm text-text-secondary">
+              <div className="flex items-center text-sm text-text-secondary mt-2">
                 <FiCalendar className="mr-2" />
                 <span>Deadline: {formatDate(project.deadline)}</span>
               </div>
             )}
           </div>
-          <div className="mt-4 md:mt-0">
-            <div className="text-sm font-medium">Project Status</div>
-            <div
-              className={`mt-1 px-3 py-1 rounded-full inline-block text-sm flex items-center ${
-                project.status === "Finished"
-                  ? "text-green-500"
-                  : "text-blue-500"
-              }`}
-            >
-              {project.status === "Finished" ? (
-                <FiCheck className="mr-1" />
-              ) : (
-                <FiClock className="mr-1" />
-              )}
-              {project.status}
-            </div>
-          </div>
         </div>
       </div>
 
       {/* Team members */}
-      <div className="bg-bg-secondary border border-border rounded-xl p-6 animate-in fade-in duration-500">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Team Members</h2>
-          <div className="text-sm text-text-secondary">
-            {members.length} member{members.length !== 1 ? "s" : ""}
+      <div className="bg-bg-secondary border border-border rounded-xl shadow-sm transition-all hover:shadow-md">
+        <div className="px-6 py-5 border-b border-border">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Team Members</h2>
+            <div className="text-sm text-text-secondary bg-bg-primary px-3 py-1 rounded-full">
+              {members.length} member{members.length !== 1 ? "s" : ""}
+            </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-bg-primary">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-text-secondary">Name</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-text-secondary">Username</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-text-secondary">Role</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-text-secondary">Joined Date</th>
-                {isLeader && <th className="px-4 py-3 text-right text-sm font-medium text-text-secondary">Actions</th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
+        <div className="p-6">
+          {members.length === 0 ? (
+            <div className="text-center py-12 text-text-secondary">
+              <FiUsers size={48} className="mx-auto mb-4 text-text-secondary" />
+              <p>No team members found</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {members.map((member) => (
-                <tr key={member.userId._id} className="hover:bg-bg-primary transition-colors">
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="font-medium">{member.userId.fullName}</div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-text-secondary">@{member.userId.username}</div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeClass(member.role)}`}>
-                      {member.role}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-text-secondary">
-                    {formatDate(member.userId.joinedDate)}
-                  </td>
-                  {isLeader && (
-                    <td className="px-4 py-4 whitespace-nowrap text-right">
-                      {member.userId._id !== currentUser?.id && (
-                        <div className="relative" ref={activeMenu === member.userId._id ? menuRef : null}>
-                          <button
-                            onClick={() => setActiveMenu(activeMenu === member.userId._id ? null : member.userId._id)}
-                            className="p-2 text-text-secondary hover:bg-bg-primary rounded-lg transition-colors"
-                          >
-                            <FiMoreVertical size={16} />
-                          </button>
+                <div 
+                  key={member.userId._id} 
+                  className="bg-bg-primary border border-border rounded-xl p-4 transition-all hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-semibold ${getAvatarColor(member.userId.fullName)}`}>
+                        {getInitials(member.userId.fullName)}
+                      </div>
+                      <div>
+                        <div className="font-medium">{member.userId.fullName}</div>
+                        <div className="text-sm text-text-secondary">@{member.userId.username}</div>
+                      </div>
+                    </div>
+                    
+                    {(isLeader || isCoLeader) && member.userId._id !== currentUser?.id && (
+                      <div className="relative" ref={activeMenu === member.userId._id ? menuRef : null}>
+                        <button
+                          onClick={() => setActiveMenu(activeMenu === member.userId._id ? null : member.userId._id)}
+                          className="p-2 text-text-secondary hover:bg-bg-secondary hover:text-text-primary rounded-lg transition-colors"
+                          aria-label="Member options"
+                        >
+                          <FiMoreHorizontal size={16} />
+                        </button>
 
-                          {activeMenu === member.userId._id && (
-                            <div className="absolute right-0 mt-1 w-48 bg-bg-secondary border border-border rounded-lg shadow-lg z-10">
-                              <div className="py-1">
-                                {member.role === "Member" && (
-                                  <button
-                                    onClick={() => handlePromoteToColeader(member.userId._id, member.userId.fullName)}
-                                    className="w-full text-left px-4 py-2 text-sm hover:bg-bg-primary"
-                                  >
-                                    Promote to Co-Leader
-                                  </button>
-                                )}
-                                {member.role === "Co-Leader" && (
-                                  <button
-                                    onClick={() => handleDemoteToMember(member.userId._id, member.userId.fullName)}
-                                    className="w-full text-left px-4 py-2 text-sm hover:bg-bg-primary"
-                                  >
-                                    Demote to Member
-                                  </button>
-                                )}
+                        {activeMenu === member.userId._id && (
+                          <div className="absolute right-0 mt-1 w-48 bg-bg-secondary border border-border rounded-lg shadow-lg z-10">
+                            <div className="py-1">
+                              {/* Only show promote option if member is not already a Leader */}
+                              {member.role === "Member" && (isLeader || isCoLeader) && (
+                                <button
+                                  onClick={() => handlePromoteToColeader(member.userId._id, member.userId.fullName)}
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-bg-primary text-text-primary flex items-center"
+                                >
+                                  <FiArrowUp className="mr-2 text-green-500" size={14} />
+                                  Promote to Co-Leader
+                                </button>
+                              )}
+                              {/* Only Leader can demote Co-Leader */}
+                              {member.role === "Co-Leader" && isLeader && (
+                                <button
+                                  onClick={() => handleDemoteToMember(member.userId._id, member.userId.fullName)}
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-bg-primary text-text-primary flex items-center"
+                                >
+                                  <FiArrowDown className="mr-2 text-orange-500" size={14} />
+                                  Demote to Member
+                                </button>
+                              )}
+                              {/* Only Leader can remove members */}
+                              {isLeader && (
                                 <button
                                   onClick={() => handleRemoveMember(member.userId._id, member.userId.fullName)}
-                                  className="w-full text-left px-4 py-2 text-sm hover:bg-bg-primary text-danger"
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-bg-primary text-danger flex items-center"
                                 >
+                                  <FiUserX className="mr-2" size={14} />
                                   Remove from Project
                                 </button>
-                              </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                  )}
-                </tr>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getRoleBadgeClass(member.role)}`}>
+                      {member.role}
+                    </span>
+                    <div className="text-xs text-text-secondary">
+                      Joined {formatDate(member.userId.joinedDate)}
+                    </div>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          )}
         </div>
-
-        {members.length === 0 && <div className="text-center py-8 text-text-secondary">No team members found</div>}
       </div>
 
       {/* Confirmation Dialog */}
