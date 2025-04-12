@@ -15,6 +15,13 @@ const Sidebar = () => {
 
   const { projects, starredProjects, recentProjects } = useSelector((state) => state.projects)
   const { sidebarCollapsed } = useSelector((state) => state.ui)
+  const { unreadCounts } = useSelector((state) => state.chat)
+
+  // Calculate total unread messages
+  const totalUnreadMessages = Object.values(unreadCounts).reduce(
+    (total, project) => total + (project.unreadCount || 0),
+    0,
+  )
 
   // Set sidebar to collapsed by default when component mounts
   useEffect(() => {
@@ -70,7 +77,7 @@ const Sidebar = () => {
     setProjectMenuOpen(null)
   }
 
-  const NavItem = ({ to, icon: Icon, label }) => (
+  const NavItem = ({ to, icon: Icon, label, badge }) => (
     <Link
       to={to}
       className={`relative flex items-center rounded-xl px-4 py-3 transition-all duration-300 group overflow-hidden ${
@@ -86,21 +93,48 @@ const Sidebar = () => {
           isActive(to)
             ? "bg-white bg-opacity-20 text-white"
             : "bg-bg-primary text-text-secondary group-hover:text-accent"
-        } transition-all duration-300`}
+        } transition-all duration-300 relative`}
       >
         <Icon size={18} />
+
+        {badge > 0 && (
+          <span
+            className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold ${
+              isActive(to) ? "bg-white text-blue-600" : "bg-red-500 text-white"
+            }`}
+          >
+            {badge > 9 ? "9+" : badge}
+          </span>
+        )}
       </div>
+
       <span
         className={`ml-3 relative z-10 transition-all duration-300 ${
           sidebarCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
         }`}
       >
         {label}
+
+        {badge > 0 && !sidebarCollapsed && (
+          <span
+            className={`ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${
+              isActive(to) ? "bg-white text-blue-600" : "bg-red-500 text-white"
+            }`}
+          >
+            {badge > 9 ? "9+" : badge}
+          </span>
+        )}
       </span>
 
       {sidebarCollapsed && hoveredItem === label.toLowerCase() && (
         <div className="absolute left-16 bg-bg-secondary text-text-primary px-3 py-2 rounded-lg shadow-lg min-w-max z-50 border border-border animate-in fade-in slide-in-from-left-5 duration-200">
           {label}
+
+          {badge > 0 && (
+            <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold">
+              {badge > 9 ? "9+" : badge}
+            </span>
+          )}
         </div>
       )}
     </Link>
@@ -132,7 +166,7 @@ const Sidebar = () => {
         <div className="space-y-2 py-3">
           <NavItem to="/dashboard" icon={FiHome} label="Dashboard" />
           <NavItem to="/dashboard/projects" icon={FiFolder} label="Projects" />
-          <NavItem to="/dashboard/chat" icon={FiMessageSquare} label="Chat" />
+          <NavItem to="/dashboard/chat" icon={FiMessageSquare} label="Chat" badge={totalUnreadMessages} />
           <NavItem to="/team" icon={FiUsers} label="Team" />
         </div>
 

@@ -7,6 +7,7 @@ import userRoutes from "./routes/user.routes.js"
 import authRoutes from "./routes/auth.routes.js"
 import projectRoutes from "./routes/project.routes.js"
 import notificationRoutes from "./routes/notification.routes.js"
+import messageRoutes from "./routes/message.routes.js"
 import setupPassport from "./config/passport.js"
 
 // Load environment variables
@@ -46,6 +47,7 @@ app.use("/auth", authRoutes)
 app.use("/api/user", userRoutes)
 app.use("/api/project", projectRoutes)
 app.use("/api/notifications", notificationRoutes)
+app.use("/api/messages", messageRoutes)
 
 app.get("/", (req, res) => {
   res.send("Hello, server is running!")

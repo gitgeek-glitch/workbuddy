@@ -1,1 +1,7 @@
 Load added projects
+
+
+// ignore below text, it is a prompt for v0
+I am creating a project where team members can create a project and chat together in it, right now, I have set up a socket server for sending notification on inviting collaborators. I now want to implement a chat feature for projects. In a project all members of that project should be able to chat with each other. In case of any chat, there need not be a notification sent yet, but the chat icon should have a red dot on it which will disappear once all chats have been read
+
+Create any model needed and controller and routes using the reference of projects and notificaitons. Create a professional UI for chat

@@ -38,6 +38,44 @@ const setupSocketIO = (server) => {
     // Store the socket connection for this user
     userSocketMap.set(userId, socket.id)
 
+    // Handle joining project chat rooms
+    socket.on("join_project_chat", (projectId) => {
+      socket.join(`project:${projectId}`)
+      console.log(`User ${userId} joined project chat: ${projectId}`)
+    })
+
+    // Handle leaving project chat rooms
+    socket.on("leave_project_chat", (projectId) => {
+      socket.leave(`project:${projectId}`)
+      console.log(`User ${userId} left project chat: ${projectId}`)
+    })
+
+    // Handle new chat messages
+    socket.on("send_message", (message) => {
+      // Broadcast to all members in the project room except sender
+      socket.to(`project:${message.projectId}`).emit("new_message", message)
+
+      // Confirm to sender that message was sent
+      socket.emit("message_sent", message)
+    })
+
+    // Handle typing indicator
+    socket.on("typing", ({ projectId, isTyping }) => {
+      socket.to(`project:${projectId}`).emit("user_typing", {
+        userId,
+        isTyping,
+      })
+    })
+
+    // Handle message read status
+    socket.on("mark_messages_read", ({ projectId }) => {
+      // Broadcast to all members that this user has read messages
+      socket.to(`project:${projectId}`).emit("messages_read", {
+        userId,
+        projectId,
+      })
+    })
+
     // Handle disconnect
     socket.on("disconnect", () => {
       console.log(`User disconnected: ${userId}`)
@@ -57,4 +95,13 @@ const sendNotificationToUser = (io, userSocketMap, userId, notification) => {
   }
 }
 
-export { setupSocketIO, sendNotificationToUser }
+// Function to send message to a project chat room
+const sendMessageToProject = (io, projectId, message, excludeUserId = null) => {
+  if (excludeUserId) {
+    io.to(`project:${projectId}`).except(userSocketMap.get(excludeUserId)).emit("new_message", message)
+  } else {
+    io.to(`project:${projectId}`).emit("new_message", message)
+  }
+}
+
+export { setupSocketIO, sendNotificationToUser, sendMessageToProject }

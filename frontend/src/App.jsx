@@ -11,6 +11,7 @@ import { checkAuthState } from "./store/slices/userSlice"
 import { getProjects } from "./store/slices/projectSlice"
 import { setTheme } from "./store/slices/themeSlice"
 import { fetchNotifications } from "./store/slices/notificationSlice"
+import { fetchUnreadCounts } from "./store/slices/chatSlice"
 import { initializeSocket, requestNotificationPermission, disconnectSocket } from "./services/socketService"
 
 import Layout from "./components/layout/Layout"
@@ -20,7 +21,7 @@ import Project from "./pages/Project"
 import Team from "./pages/Team"
 import TeamDetails from "./pages/TeamDetails"
 import ProjectDetails from "./pages/ProjectDetails"
-import Chat from "./pages/Chat"
+import ProjectChat from "./pages/ProjectChat"
 import Profile from "./pages/Profile"
 import Notifications from "./pages/Notifications"
 import Login from "./pages/Login"
@@ -49,9 +50,10 @@ const AppContent = () => {
     if (isAuthenticated && token) {
       initializeSocket(token, store)
 
-      // Load projects and notifications
+      // Load projects, notifications, and chat unread counts
       dispatch(getProjects())
       dispatch(fetchNotifications())
+      dispatch(fetchUnreadCounts())
     }
 
     // Cleanup socket connection on unmount
@@ -100,7 +102,8 @@ const AppContent = () => {
           <Route index element={<ProjectDetails />} />
         </Route>
         <Route path="/dashboard/chat" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
-          <Route index element={<Chat />} />
+          <Route index element={<ProjectChat />} />
+          <Route path=":projectId" element={<ProjectChat />} />
         </Route>
         <Route path="/dashboard/profile" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
           <Route index element={<Profile />} />

@@ -1,1 +1,0 @@
-- Allow maximum 3 invites per user in a week
