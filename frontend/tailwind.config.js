@@ -5,8 +5,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        accent: '#3b82f6', // or whatever color you want
-        'accent-hover': '#2563eb',
+        "accent-hover": "#2563eb",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -54,6 +53,18 @@ module.exports = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      animation: {
+        bounce: "bounce 1s infinite",
+        spin: "spin 1s linear infinite",
+        "spin-slow": "spin-slow 3s linear infinite",
+        pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        ping: "ping 1s cubic-bezier(0, 0, 0.2, 1) infinite",
+        float: "float 6s ease-in-out infinite",
+        blob: "blob 7s infinite",
+      },
+      minWidth: {
+        5: "1.25rem",
       },
     },
   },

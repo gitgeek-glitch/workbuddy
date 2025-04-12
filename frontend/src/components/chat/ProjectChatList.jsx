@@ -1,21 +1,31 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { FiSearch } from "react-icons/fi"
+import { FiSearch, FiMessageSquare, FiUsers } from "react-icons/fi"
 import { setActiveProject } from "../../store/slices/chatSlice"
 
 const ProjectChatList = ({ projects, onProjectSelect }) => {
   const dispatch = useDispatch()
   const { activeProjectId, unreadCounts } = useSelector((state) => state.chat)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredProjects, setFilteredProjects] = useState(projects)
 
   useEffect(() => {
-    // Set first project as active if none is selected
     if (projects.length > 0 && !activeProjectId) {
       dispatch(setActiveProject(projects[0]._id))
       onProjectSelect(projects[0]._id)
     }
   }, [projects, activeProjectId, dispatch, onProjectSelect])
+
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredProjects(projects)
+    } else {
+      const filtered = projects.filter((project) => project.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      setFilteredProjects(filtered)
+    }
+  }, [searchTerm, projects])
 
   const handleProjectClick = (projectId) => {
     dispatch(setActiveProject(projectId))
@@ -23,45 +33,63 @@ const ProjectChatList = ({ projects, onProjectSelect }) => {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+    <div className="project-list-container">
+      <div className="p-4 border-b border-border">
+        <h2 className="text-lg font-semibold mb-4 flex items-center">
+          <FiMessageSquare className="mr-2 text-accent" />
+          Project Chats
+        </h2>
         <div className="relative">
           <input
             type="text"
             placeholder="Search projects..."
-            className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md py-1.5 pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-600"
+            className="w-full bg-bg-primary border border-border rounded-md py-1.5 pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FiSearch className="absolute left-3 top-2 text-gray-500 dark:text-gray-400" />
+          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" />
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2">
-        {projects.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">No projects found</div>
+      {/* Project List */}
+      <div className="project-list">
+        {filteredProjects.length === 0 ? (
+          <div className="project-list-empty">
+            {searchTerm ? "No matching projects found" : "No projects available"}
+          </div>
         ) : (
-          <div className="space-y-1">
-            {projects.map((project) => {
+          <div className="space-y-1 p-2">
+            {filteredProjects.map((project) => {
               const unreadCount = unreadCounts[project._id]?.unreadCount || 0
+              const isActive = activeProjectId === project._id
 
               return (
                 <button
                   key={project._id}
                   onClick={() => handleProjectClick(project._id)}
-                  className={`w-full text-left p-2 rounded-md transition-colors ${
-                    activeProjectId === project._id
-                      ? "bg-blue-50 dark:bg-blue-900 dark:bg-blue-800/50"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
+                  className={`project-item ${isActive ? "project-item-active" : "project-item-inactive"} hover-card`}
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium">{project.name}</div>
-                    {unreadCount > 0 && (
-                      <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {unreadCount}
-                      </span>
-                    )}
+                  <div className="flex items-center">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${isActive ? "bg-white bg-opacity-20" : "bg-bg-primary"}`}
+                    >
+                      {project.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="project-item-title">
+                        <div className="font-medium truncate">{project.name}</div>
+                        {unreadCount > 0 && <span className="project-item-badge">{unreadCount}</span>}
+                      </div>
+                      <div
+                        className={`project-item-subtitle ${
+                          isActive ? "project-item-subtitle-active" : "project-item-subtitle-inactive"
+                        } flex items-center`}
+                      >
+                        <FiUsers size={10} className="mr-1" />
+                        {project.members?.length || 0} members
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{project.members.length} members</div>
                 </button>
               )
             })}

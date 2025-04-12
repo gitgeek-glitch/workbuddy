@@ -1,14 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
+import { getProjects } from "../store/slices/projectSlice"
 import { FiUsers, FiSearch, FiStar, FiCalendar, FiClock, FiCheck } from "react-icons/fi"
 
 const Team = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const { projects, loading, error } = useSelector((state) => state.projects)
   const [searchTerm, setSearchTerm] = useState("")
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  // Ensure projects are loaded
+  useEffect(() => {
+    if (!projects || projects.length === 0) {
+      dispatch(getProjects())
+    } else if (!isInitialized) {
+      setIsInitialized(true)
+    }
+  }, [projects, dispatch, isInitialized])
 
   // Filter projects based on search term
   const filteredProjects = projects.filter(
@@ -39,7 +51,7 @@ const Team = () => {
     }
   }
 
-  if (loading) {
+  if (loading || !isInitialized) {
     return (
       <div className="flex items-center justify-center h-full min-h-[70vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
@@ -90,45 +102,51 @@ const Team = () => {
           {filteredProjects.map((project) => (
             <div
               key={project._id}
-              className="bg-bg-secondary border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
+              className="bg-bg-secondary border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover-card"
             >
               <div className="p-6">
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-lg font-bold truncate mr-2">{project.name}</h3>
                   {project.important && <FiStar className="text-yellow-500 flex-shrink-0" size={18} />}
                 </div>
-                
+
                 <p className="text-text-secondary text-sm mb-4 line-clamp-2">
                   {project.description || "No description provided"}
                 </p>
-                
+
                 <div className="flex flex-wrap items-center gap-2 mb-4">
                   {project.status && (
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center ${getStatusBadgeClass(project.status)}`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center ${getStatusBadgeClass(project.status)}`}
+                    >
                       {project.status === "Finished" ? (
-                        <><FiCheck size={12} className="mr-1" /> {project.status}</>
+                        <>
+                          <FiCheck size={12} className="mr-1" /> {project.status}
+                        </>
                       ) : (
-                        <><FiClock size={12} className="mr-1" /> {project.status}</>
+                        <>
+                          <FiClock size={12} className="mr-1" /> {project.status}
+                        </>
                       )}
                     </span>
                   )}
-                  
+
                   {project.deadline && formatDate(project.deadline) && (
                     <span className="px-3 py-1 rounded-full text-xs font-medium border border-border bg-bg-primary text-text-secondary flex items-center">
                       <FiCalendar size={12} className="mr-1" /> {formatDate(project.deadline)}
                     </span>
                   )}
                 </div>
-                
+
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
                   <span className="text-sm text-text-secondary flex items-center">
-                    <FiUsers size={16} className="mr-1" /> 
+                    <FiUsers size={16} className="mr-1" />
                     {project.members?.length || 0} member{project.members?.length !== 1 ? "s" : ""}
                   </span>
-                  
+
                   <button
                     onClick={() => navigate(`/team/${project._id}`)}
-                    className="bg-accent hover:bg-accent/90 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+                    className="bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
                   >
                     View Team
                   </button>

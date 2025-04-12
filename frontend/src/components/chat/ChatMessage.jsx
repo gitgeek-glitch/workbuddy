@@ -2,41 +2,38 @@ import { formatDistanceToNow } from "date-fns"
 import { useSelector } from "react-redux"
 
 const ChatMessage = ({ message }) => {
-  const currentUser = useSelector((state) => state.user)
-  console.log(currentUser);
-  
+  const { currentUser } = useSelector((state) => state.user)
+
   const isCurrentUser = message.sender._id === currentUser._id
 
   // Format timestamp
   const formattedTime = message.timestamp ? formatDistanceToNow(new Date(message.timestamp), { addSuffix: true }) : ""
 
   return (
-    <div className={`flex ${isCurrentUser ? "justify-end" : "justify-start"} mb-4`}>
+    <div
+      className={`chat-message-container ${isCurrentUser ? "chat-message-container-sent" : "chat-message-container-received"} group animate-in ${isCurrentUser ? "slide-in-from-right-5" : "slide-in-from-left-5"} duration-300`}
+    >
       {!isCurrentUser && (
-        <div className="w-9 h-9 rounded-full mr-3 mt-1 bg-gray-200 flex items-center justify-center text-gray-600 font-medium">
-          {message.sender.fullName ? message.sender.fullName.charAt(0) : message.sender.username.charAt(0)}
+        <div className="chat-avatar chat-avatar-received">
+          {message.sender.fullName
+            ? message.sender.fullName.charAt(0).toUpperCase()
+            : message.sender.username.charAt(0).toUpperCase()}
         </div>
       )}
 
-      <div
-        className={`max-w-[70%] ${
-          isCurrentUser ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-800"
-        } rounded-lg px-4 py-2`}
-      >
-        {!isCurrentUser && (
-          <div className="font-medium text-sm mb-1">{message.sender.fullName || message.sender.username}</div>
-        )}
-        <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-        <div
-          className={`text-xs mt-1 ${isCurrentUser ? "text-white text-opacity-80" : "text-gray-500 dark:text-gray-400"}`}
-        >
+      <div className={`chat-bubble ${isCurrentUser ? "chat-bubble-sent" : "chat-bubble-received"}`}>
+        {!isCurrentUser && <div className="chat-sender-name">{message.sender.fullName || message.sender.username}</div>}
+        <p className="chat-message-text">{message.content}</p>
+        <div className={`chat-message-time ${isCurrentUser ? "chat-message-time-sent" : "chat-message-time-received"}`}>
           {formattedTime}
         </div>
       </div>
 
       {isCurrentUser && (
-        <div className="w-9 h-9 rounded-full ml-3 mt-1 bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
-          {currentUser.fullName ? currentUser.fullName.charAt(0) : currentUser.username.charAt(0)}
+        <div className="chat-avatar chat-avatar-sent">
+          {currentUser.fullName
+            ? currentUser.fullName.charAt(0).toUpperCase()
+            : currentUser.username.charAt(0).toUpperCase()}
         </div>
       )}
     </div>

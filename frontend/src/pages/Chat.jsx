@@ -1,28 +1,55 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
+import { getProjects } from "../store/slices/projectSlice"
+import { FiMessageSquare } from "react-icons/fi"
 
 const Chat = () => {
   const navigate = useNavigate()
-  const { projects } = useSelector((state) => state.projects)
+  const dispatch = useDispatch()
+  const { projects, loading } = useSelector((state) => state.projects)
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    // If there are projects, redirect to the first project's chat
-    if (projects && projects.length > 0) {
+    // Ensure projects are loaded
+    if (!projects || projects.length === 0) {
+      dispatch(getProjects())
+    } else {
+      setIsLoaded(true)
+    }
+  }, [projects, dispatch])
+
+  useEffect(() => {
+    // Only redirect after we confirm projects are loaded
+    if (isLoaded && projects.length > 0) {
       navigate(`/dashboard/chat/${projects[0]._id}`)
     }
-  }, [projects, navigate])
+  }, [isLoaded, projects, navigate])
 
   return (
-    <div className="flex items-center justify-center h-[calc(100vh-64px)]">
-      <div className="text-center">
-        <h2 className="text-2xl font-semibold mb-4">Chat</h2>
-        {projects && projects.length === 0 ? (
-          <p className="text-gray-500">You don't have any projects yet. Create a project to start chatting.</p>
+    <div className="flex items-center justify-center h-[calc(100vh-64px)] bg-bg-primary">
+      <div className="text-center glassmorphism p-8 rounded-2xl animate-in fade-in duration-500 max-w-md">
+        <FiMessageSquare size={64} className="mx-auto mb-6 text-accent animate-float" />
+        <h2 className="text-2xl font-semibold mb-4 gradient-text">Project Chat</h2>
+        {loading ? (
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent mb-2"></div>
+            <p className="text-text-secondary">Loading your projects...</p>
+          </div>
+        ) : projects && projects.length === 0 ? (
+          <div>
+            <p className="text-text-secondary mb-4">You don't have any projects yet.</p>
+            <button onClick={() => navigate("/dashboard/projects")} className="btn-primary">
+              Create Your First Project
+            </button>
+          </div>
         ) : (
-          <p className="text-gray-500">Loading chats...</p>
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-4"></div>
+            <p className="text-text-secondary">Redirecting to your chats...</p>
+          </div>
         )}
       </div>
     </div>

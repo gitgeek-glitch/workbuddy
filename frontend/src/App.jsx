@@ -30,6 +30,7 @@ import OAuthCallback from "./pages/OAuthCallback"
 import LoadingScreen from "./components/ui/LoadingScreen"
 import { ThemeProvider } from "./context/ThemeContext"
 import { ProjectProvider } from "./context/ProjectContext"
+import Chat from "./pages/Chat"
 
 // Wrapper component that handles auth state and provides context
 const AppContent = () => {
@@ -102,7 +103,7 @@ const AppContent = () => {
           <Route index element={<ProjectDetails />} />
         </Route>
         <Route path="/dashboard/chat" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
-          <Route index element={<ProjectChat />} />
+          <Route index element={<Chat />} />
           <Route path=":projectId" element={<ProjectChat />} />
         </Route>
         <Route path="/dashboard/profile" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
