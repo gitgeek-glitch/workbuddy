@@ -299,40 +299,45 @@ const TeamDetails = () => {
       {/* Project info card */}
       <div className="bg-bg-secondary border border-border rounded-xl p-6 mb-8 shadow-sm transition-all hover:shadow-md">
         <div className="flex flex-col lg:flex-row justify-between">
-          <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-2">
-              <h2 className="text-xl font-semibold">{project.name}</h2>
-              {project.important && <FiStar className="text-yellow-500" size={18} />}
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(project.status)}`}>
-                {project.status === "Finished" ? (
-                  <span className="flex items-center">
-                    <FiCheck className="mr-1" size={12} />
-                    {project.status}
-                  </span>
-                ) : (
-                  <span className="flex items-center">
-                    <FiClock className="mr-1" size={12} />
-                    {project.status}
-                  </span>
-                )}
-              </span>
+            <div className="flex-1">
+            <div className="flex items-center mb-2">
+                <h2 className="text-xl font-semibold">{project.name}</h2>
+                {project.important && <FiStar className="ml-2 text-yellow-500" size={18} />}
             </div>
             <p className="text-text-secondary mb-4 max-w-3xl">{project.description}</p>
-          </div>
-          <div className="mt-4 lg:mt-0 lg:ml-6 flex flex-col items-start lg:items-end">
-            <div className="flex items-center text-sm text-text-secondary">
-              <FiUsers className="mr-2" />
-              <span>{members.length} team member{members.length !== 1 ? "s" : ""}</span>
             </div>
+            <div className="mt-4 lg:mt-0 lg:ml-6 flex flex-col items-start lg:items-end">
+            {/* Status badge moved here - to extreme right */}
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(project.status)}`}>
+                {project.status === "Finished" ? (
+                <span className="flex items-center">
+                    <FiCheck className="mr-1" size={12} />
+                    {project.status}
+                </span>
+                ) : (
+                <span className="flex items-center">
+                    <FiClock className="mr-1" size={12} />
+                    {project.status}
+                </span>
+                )}
+            </span>
+            
+            {/* Deadline info below status badge for ongoing projects */}
             {project.deadline && project.status !== "Finished" && (
-              <div className="flex items-center text-sm text-text-secondary mt-2">
+                <div className="flex items-center text-sm text-text-secondary mt-2">
                 <FiCalendar className="mr-2" />
                 <span>Deadline: {formatDate(project.deadline)}</span>
-              </div>
+                </div>
             )}
-          </div>
+            
+            {/* Team members count below other info */}
+            <div className="flex items-center text-sm text-text-secondary mt-2">
+                <FiUsers className="mr-2" />
+                <span>{members.length} team member{members.length !== 1 ? "s" : ""}</span>
+            </div>
+            </div>
         </div>
-      </div>
+        </div>
 
       {/* Team members */}
       <div className="bg-bg-secondary border border-border rounded-xl shadow-sm transition-all hover:shadow-md">
