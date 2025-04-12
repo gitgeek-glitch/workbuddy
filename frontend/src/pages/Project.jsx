@@ -138,7 +138,7 @@ const Project = () => {
                 filter === "important" ? "bg-accent text-white" : "bg-bg-secondary"
               }`}
             >
-              Important
+              Important 
             </button>
           </div>
         )}

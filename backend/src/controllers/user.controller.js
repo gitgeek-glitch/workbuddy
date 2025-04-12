@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { User } from "../models/user.model.js"
+import {Project} from "../models/project.model.js"
 import winston from "winston"
 import passport from "passport"
 
@@ -48,10 +49,10 @@ export const checkUsername = async (req, res) => {
   }
 }
 
-// Search users by username or full name
+
 export const searchUsers = async (req, res) => {
   try {
-    const { query } = req.query
+    const { query, projectId } = req.query
     const currentUserId = req.user?._id
 
     if (!query || query.trim() === "") {
@@ -65,19 +66,36 @@ export const searchUsers = async (req, res) => {
     // Create a regex for case-insensitive search
     const searchRegex = new RegExp(query, "i")
 
-    // Find users matching the search query by username or fullName
-    // Exclude the current user from results
+    // Get user IDs to exclude (members + invitations)
+    let excludedUserIds = []
+    if (projectId) {
+      const project = await Project.findById(projectId).select("members invitations")
+      if (project) {
+        excludedUserIds = [
+          ...project.members.map((member) => member.userId.toString()),
+          ...project.invitations.map((userId) => userId.toString()),
+        ]
+      }
+    }
+
+    // Always exclude current user
+    if (currentUserId) {
+      excludedUserIds.push(currentUserId.toString())
+    }
+
+    // Find users by username or fullName and exclude the ones already in the project
     const users = await User.find({
       $and: [
         {
           $or: [{ username: searchRegex }, { fullName: searchRegex }],
         },
-        // Exclude current user if authenticated
-        ...(currentUserId ? [{ _id: { $ne: currentUserId } }] : []),
+        {
+          _id: { $nin: excludedUserIds },
+        },
       ],
     })
       .select("_id username fullName email")
-      .limit(10) // Limit results for performance
+      .limit(10)
 
     logger.info(`${new Date().toISOString()} - Success: Found ${users.length} users matching query: ${query}`)
 
@@ -87,6 +105,7 @@ export const searchUsers = async (req, res) => {
       code: 200,
     })
   } catch (error) {
+    console.log(error)
     logger.error(`${new Date().toISOString()} - Error: Error searching users - ${error.message}`)
     return res.status(500).json({
       message: "Internal Server Error",
@@ -95,6 +114,7 @@ export const searchUsers = async (req, res) => {
     })
   }
 }
+
 
 export const userSignUp = async (req, res) => {
   try {

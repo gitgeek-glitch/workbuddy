@@ -48,11 +48,12 @@ const AddCollaboratorsModal = ({ projectId, onClose }) => {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
 
       const response = await axios.get(`${API_URL}/api/user/search`, {
-        params: { query },
+        params: { query, projectId },
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
+      
 
       // Filter out users that are already selected
       const filteredResults = response.data.data.filter(
