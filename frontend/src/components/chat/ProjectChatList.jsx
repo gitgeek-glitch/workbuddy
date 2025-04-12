@@ -34,8 +34,8 @@ const ProjectChatList = ({ projects, onProjectSelect }) => {
 
   return (
     <div className="project-list-container">
-      <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold mb-4 flex items-center">
+      <div className="p-5 border-b border-border">
+        <h2 className="text-xl font-semibold mb-4 flex items-center text-text-primary">
           <FiMessageSquare className="mr-2 text-accent" />
           Project Chats
         </h2>
@@ -43,11 +43,11 @@ const ProjectChatList = ({ projects, onProjectSelect }) => {
           <input
             type="text"
             placeholder="Search projects..."
-            className="w-full bg-bg-primary border border-border rounded-md py-1.5 pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
+            className="w-full bg-bg-primary border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-all duration-200"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" />
+          <FiSearch className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-text-secondary" />
         </div>
       </div>
 
@@ -55,10 +55,13 @@ const ProjectChatList = ({ projects, onProjectSelect }) => {
       <div className="project-list">
         {filteredProjects.length === 0 ? (
           <div className="project-list-empty">
-            {searchTerm ? "No matching projects found" : "No projects available"}
+            <div className="flex flex-col items-center">
+              <FiMessageSquare size={24} className="mb-2 opacity-50" />
+              {searchTerm ? "No matching projects found" : "No projects available"}
+            </div>
           </div>
         ) : (
-          <div className="space-y-1 p-2">
+          <div className="space-y-2 p-2">
             {filteredProjects.map((project) => {
               const unreadCount = unreadCounts[project._id]?.unreadCount || 0
               const isActive = activeProjectId === project._id
@@ -71,14 +74,16 @@ const ProjectChatList = ({ projects, onProjectSelect }) => {
                 >
                   <div className="flex items-center">
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${isActive ? "bg-white bg-opacity-20" : "bg-bg-primary"}`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 shadow-sm ${
+                        isActive ? "bg-white bg-opacity-20" : "bg-gradient-to-br from-bg-primary to-border"
+                      }`}
                     >
                       {project.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 text-left">
                       <div className="project-item-title">
                         <div className="font-medium truncate">{project.name}</div>
-                        {unreadCount > 0 && <span className="project-item-badge">{unreadCount}</span>}
+                        {unreadCount > 0 && <span className="project-item-badge animate-pulse">{unreadCount}</span>}
                       </div>
                       <div
                         className={`project-item-subtitle ${

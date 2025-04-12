@@ -6,11 +6,11 @@ const ChatHeader = ({ project, onInfoClick }) => {
   if (!project) return null
 
   return (
-    <div className="chat-header bg-bg-secondary border-b border-border">
+    <div className="chat-header">
       <div className="flex items-center">
         <div className="chat-header-avatar">{project.name.charAt(0).toUpperCase()}</div>
         <div>
-          <h2 className="font-medium">{project.name}</h2>
+          <h2 className="font-semibold text-lg text-text-primary">{project.name}</h2>
           <div className="chat-header-info">
             <FiUsers size={12} className="mr-1" />
             <span>{project.members?.length || 0} members</span>

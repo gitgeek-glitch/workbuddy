@@ -55,9 +55,9 @@ const ChatInput = ({ projectId }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="chat-input-container bg-bg-secondary border-t border-border">
+    <form onSubmit={handleSubmit} className="chat-input-container">
       <button type="button" className="chat-input-button" aria-label="Attach file">
-        <FiPaperclip size={18} />
+        <FiPaperclip size={20} />
       </button>
 
       <div className="relative flex-1">
@@ -71,7 +71,7 @@ const ChatInput = ({ projectId }) => {
           className="chat-input-field"
         />
         <button type="button" className="chat-input-emoji" aria-label="Insert emoji">
-          <FiSmile size={18} />
+          <FiSmile size={20} />
         </button>
       </div>
 
@@ -81,7 +81,7 @@ const ChatInput = ({ projectId }) => {
         className={`chat-input-send ${message.trim() ? "chat-input-send-active" : "chat-input-send-inactive"}`}
         aria-label="Send message"
       >
-        <FiSend size={18} />
+        <FiSend size={20} />
       </button>
     </form>
   )
