@@ -1,3 +1,1 @@
-- Don't allow to send invite to members who have already joined the project
 - Allow maximum 3 invites per user in a week
-- If a member leaves, allow leader to invite him again
