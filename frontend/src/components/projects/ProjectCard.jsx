@@ -304,7 +304,7 @@ const ProjectCard = ({ project }) => {
 
       <p className="text-sm text-text-secondary mb-3 line-clamp-2">{project.description}</p>
 
-      {project.deadline && (
+      {project.status !== "Finished" && project.deadline && (
         <div className="flex items-center text-xs text-text-secondary mb-2">
           <FiClock className="mr-1" />
           <span>Deadline: {formatDate(project.deadline)}</span>
@@ -312,16 +312,9 @@ const ProjectCard = ({ project }) => {
       )}
 
       <div className="flex justify-between items-center mt-3">
-        {project.status === "Finished" ? (
-          <div className="flex items-center text-xs text-green-500">
-            <FiCheckCircle className="mr-1" />
-            <span>Finished</span>
-          </div>
-        ) : (
-          <button onClick={() => navigate(`/projects/${project._id}`)} className="btn-primary btn-sm">
-            View Project
-          </button>
-        )}
+        <button onClick={() => navigate(`/projects/${project._id}`)} className="btn-primary btn-sm">
+          View Project
+        </button>
 
         <div className="text-xs text-text-secondary">
           {project.members?.length || 0} member{project.members?.length !== 1 ? "s" : ""}
