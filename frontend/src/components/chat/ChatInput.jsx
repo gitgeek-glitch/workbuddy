@@ -1,24 +1,26 @@
+// components/chat/ChatInput.jsx
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { useDispatch } from "react-redux"
-import { FiSend, FiPaperclip, FiSmile } from "react-icons/fi"
-import { sendMessage } from "../../store/slices/chatSlice"
+import { useDispatch, useSelector } from "react-redux"
+import { FiSend, FiPaperclip, FiSmile, FiX } from "react-icons/fi"
+import { sendMessage, clearReplyToMessage } from "../../store/slices/chatSlice"
 import { sendTypingStatus } from "../../services/socketService"
 
 const ChatInput = ({ projectId }) => {
   const [message, setMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const dispatch = useDispatch()
+  const { replyToMessage } = useSelector((state) => state.chat)
   const inputRef = useRef(null)
   const typingTimeoutRef = useRef(null)
 
   useEffect(() => {
-    // Focus input on mount
+    // Focus input on mount or when replyToMessage changes
     if (inputRef.current) {
       inputRef.current.focus()
     }
-  }, [projectId])
+  }, [projectId, replyToMessage])
 
   const handleTyping = () => {
     if (!isTyping) {
@@ -43,7 +45,17 @@ const ChatInput = ({ projectId }) => {
 
     if (!message.trim()) return
 
-    dispatch(sendMessage({ projectId, content: message.trim() }))
+    const messageData = {
+      projectId,
+      content: message.trim(),
+    }
+
+    // Add reference if replying to a message
+    if (replyToMessage) {
+      messageData.referenceId = replyToMessage._id
+    }
+
+    dispatch(sendMessage(messageData))
     setMessage("")
 
     // Clear typing indicator
@@ -54,36 +66,66 @@ const ChatInput = ({ projectId }) => {
     sendTypingStatus(projectId, false)
   }
 
+  const handleCancelReply = () => {
+    dispatch(clearReplyToMessage())
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="chat-input-container">
-      <button type="button" className="chat-input-button" aria-label="Attach file">
-        <FiPaperclip size={20} />
-      </button>
+    <>
+      {replyToMessage && (
+        <div className="reply-container" style={{ backgroundColor: 'var(--color-bg-secondary)', borderColor: 'var(--color-border)' }}>
+          <div className="reply-header">
+            <div className="reply-to-text">
+              <span className="mr-2">Replying to</span>
+              <span className="reply-username" style={{ color: 'var(--color-accent)' }}>
+                {replyToMessage.sender.fullName || replyToMessage.sender.username}
+              </span>
+            </div>
+            <button
+              onClick={handleCancelReply}
+              className="reply-cancel"
+              style={{ color: 'var(--color-text-secondary)' }}
+              aria-label="Cancel reply"
+            >
+              <FiX size={16} />
+            </button>
+          </div>
+          <div className="reply-content" style={{ color: 'var(--color-text-secondary)' }}>
+            {replyToMessage.content}
+          </div>
+        </div>
+      )}
 
-      <div className="relative flex-1">
-        <input
-          ref={inputRef}
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleTyping}
-          placeholder="Type a message..."
-          className="chat-input-field"
-        />
-        <button type="button" className="chat-input-emoji" aria-label="Insert emoji">
-          <FiSmile size={20} />
+      <form onSubmit={handleSubmit} className="chat-input-container">
+        <button type="button" className="chat-input-button" aria-label="Attach file">
+          <FiPaperclip size={20} />
         </button>
-      </div>
 
-      <button
-        type="submit"
-        disabled={!message.trim()}
-        className={`chat-input-send ${message.trim() ? "chat-input-send-active" : "chat-input-send-inactive"}`}
-        aria-label="Send message"
-      >
-        <FiSend size={20} />
-      </button>
-    </form>
+        <div className="relative flex-1">
+          <input
+            ref={inputRef}
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleTyping}
+            placeholder={replyToMessage ? "Type your reply..." : "Type a message..."}
+            className="chat-input-field"
+          />
+          <button type="button" className="chat-input-emoji" aria-label="Insert emoji">
+            <FiSmile size={20} />
+          </button>
+        </div>
+
+        <button
+          type="submit"
+          disabled={!message.trim()}
+          className={`chat-input-send ${message.trim() ? "chat-input-send-active" : "chat-input-send-inactive"}`}
+          aria-label="Send message"
+        >
+          <FiSend size={20} />
+        </button>
+      </form>
+    </>
   )
 }
 

@@ -1,6 +1,7 @@
+// ProjectChat.jsx
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useParams } from "react-router-dom"
 import { fetchProjectMessages, fetchUnreadCounts, markProjectAsRead } from "../store/slices/chatSlice"
@@ -23,6 +24,7 @@ const ProjectChat = () => {
   const [isInitialized, setIsInitialized] = useState(false)
   const messagesEndRef = useRef(null)
   const messagesContainerRef = useRef(null)
+  const messageRefs = useRef({})
 
   // Ensure projects are loaded
   useEffect(() => {
@@ -84,6 +86,28 @@ const ProjectChat = () => {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [messages, activeProjectId])
+
+  // Scroll to a specific message
+  const scrollToMessage = useCallback((messageId) => {
+    const element = document.getElementById(`message-${messageId}`)
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" })
+
+      // Highlight the message briefly
+      element.style.backgroundColor = 'var(--color-accent)';
+      element.style.opacity = '0.1';
+      
+      setTimeout(() => {
+        element.style.backgroundColor = 'transparent';
+        element.style.opacity = '1';
+        element.style.transition = 'background-color 1s ease, opacity 1s ease';
+      }, 100);
+      
+      setTimeout(() => {
+        element.style.transition = '';
+      }, 2000);
+    }
+  }, [])
 
   // Group messages by date for WhatsApp-like date separators
   const groupMessagesByDate = (messages) => {
@@ -157,7 +181,12 @@ const ProjectChat = () => {
                         </div>
                       </div>
                       {msgs.map((message) => (
-                        <ChatMessage key={message._id} message={message} />
+                        <ChatMessage
+                          key={message._id}
+                          message={message}
+                          allMessages={currentMessages}
+                          onScrollToMessage={scrollToMessage}
+                        />
                       ))}
                     </div>
                   ))}

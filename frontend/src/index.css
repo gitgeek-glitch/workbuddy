@@ -619,31 +619,54 @@ select:focus {
 }
 /* Chat component styles */
 .chat-header {
-  @apply flex items-center justify-between p-4 border-b border-border bg-bg-secondary;
+  @apply flex items-center justify-between p-4 border-b border-border;
+  background-color: var(--color-bg-secondary);
 }
 
 .chat-header-avatar {
-  @apply mr-3 w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center text-white font-medium shadow-md;
+  @apply mr-3 w-10 h-10 rounded-full flex items-center justify-center text-white font-medium shadow-md;
+  background: linear-gradient(to bottom right, var(--color-accent), #4a7dbd);
 }
 
 .chat-header-info {
-  @apply text-xs text-text-secondary flex items-center mt-1;
+  @apply text-xs flex items-center mt-1;
+  color: var(--color-text-secondary);
 }
 
 .chat-input-container {
-  @apply flex items-center space-x-3 p-4 border-t border-border bg-bg-secondary;
+  @apply flex items-center space-x-3 p-4 border-t border-border;
+  background-color: var(--color-bg-secondary);
 }
 
 .chat-input-button {
-  @apply p-2.5 rounded-full text-text-secondary hover:text-text-primary hover:bg-border transition-colors;
+  @apply p-2.5 rounded-full transition-colors;
+  color: var(--color-text-secondary);
+}
+
+.chat-input-button:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-border);
 }
 
 .chat-input-field {
-  @apply w-full px-4 py-3 rounded-full border border-border bg-bg-primary text-text-primary focus:outline-none focus:ring-2 focus:ring-accent shadow-sm transition-all duration-200;
+  @apply w-full px-4 py-3 rounded-full border text-text-primary focus:outline-none shadow-sm transition-all duration-200;
+  border-color: var(--color-border);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.chat-input-field:focus {
+  box-shadow: 0 0 0 2px var(--color-accent);
 }
 
 .chat-input-emoji {
-  @apply absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded-full text-text-secondary hover:text-text-primary hover:bg-border transition-colors;
+  @apply absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded-full transition-colors;
+  color: var(--color-text-secondary);
+}
+
+.chat-input-emoji:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-border);
 }
 
 .chat-input-send {
@@ -651,23 +674,39 @@ select:focus {
 }
 
 .chat-input-send-active {
-  @apply bg-gradient-to-r from-accent to-blue-500 text-white hover:shadow-md hover:opacity-90;
+  background: linear-gradient(to right, var(--color-accent), #4a7dbd);
+  color: white;
+}
+
+.chat-input-send-active:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .chat-input-send-inactive {
-  @apply bg-border text-text-secondary;
+  background-color: var(--color-border);
+  color: var(--color-text-secondary);
 }
 
 .project-list-container {
-  @apply h-full flex flex-col bg-bg-secondary shadow-md;
+  @apply h-full flex flex-col shadow-md;
+  background-color: var(--color-bg-secondary);
 }
 
 .project-search-container {
-  @apply p-4 border-b border-border;
+  @apply p-4 border-b;
+  border-color: var(--color-border);
 }
 
 .project-search-input {
-  @apply w-full bg-bg-primary border border-border rounded-lg py-2 pl-9 pr-4 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent transition-all duration-200;
+  @apply w-full rounded-lg py-2 pl-9 pr-4 text-sm focus:outline-none transition-all duration-200;
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.project-search-input:focus {
+  box-shadow: 0 0 0 2px var(--color-accent);
 }
 
 .project-list {
@@ -675,19 +714,27 @@ select:focus {
 }
 
 .project-list-empty {
-  @apply text-center py-12 text-text-secondary italic;
+  @apply text-center py-12 italic;
+  color: var(--color-text-secondary);
 }
 
 .project-item {
-  @apply w-full text-left p-3 rounded-xl transition-all duration-200 text-text-primary;
+  @apply w-full text-left p-3 rounded-xl transition-all duration-200;
+  color: var(--color-text-primary);
 }
 
 .project-item-active {
-  @apply bg-gradient-to-r from-accent to-blue-500 text-white shadow-md;
+  background: linear-gradient(to right, var(--color-accent), #4a7dbd);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .project-item-inactive {
   @apply hover:bg-border;
+}
+
+.project-item-inactive:hover {
+  background-color: var(--color-border);
 }
 
 .project-item-title {
@@ -695,7 +742,8 @@ select:focus {
 }
 
 .project-item-badge {
-  @apply bg-danger text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm;
+  @apply text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm;
+  background-color: var(--color-danger);
 }
 
 .project-item-subtitle {
@@ -703,11 +751,11 @@ select:focus {
 }
 
 .project-item-subtitle-active {
-  @apply text-white/90;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .project-item-subtitle-inactive {
-  @apply text-text-secondary;
+  color: var(--color-text-secondary);
 }
 
 .chat-message-container {
@@ -729,11 +777,15 @@ select:focus {
 }
 
 .chat-bubble-sent {
-  @apply bg-accent text-white rounded-tr-none;
+  @apply rounded-tr-none;
+  background-color: var(--color-accent);
+  color: white;
 }
 
 .chat-bubble-received {
-  @apply bg-bg-secondary text-text-primary rounded-tl-none;
+  @apply rounded-tl-none;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
 }
 
 /* Chat bubble tails */
@@ -759,10 +811,6 @@ select:focus {
   border-top: 8px solid transparent;
 }
 
-:root.light-theme .chat-bubble-received::before {
-  border-right-color: var(--color-bg-secondary);
-}
-
 .chat-sender-name {
   @apply font-medium text-xs mb-1;
 }
@@ -776,16 +824,17 @@ select:focus {
 }
 
 .chat-message-time-sent {
-  @apply text-white/80;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .chat-message-time-received {
-  @apply text-text-secondary;
+  color: var(--color-text-secondary);
 }
 
 /* Chat messages container */
 .chat-messages {
   @apply flex-1 overflow-y-auto p-2 pt-4;
+  background-color: var(--color-bg-primary);
   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23000000' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
   background-attachment: fixed;
 }
@@ -794,17 +843,19 @@ select:focus {
   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23000000' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
 }
 
-
 .typing-indicator {
-  @apply flex items-center text-xs text-text-secondary p-3 ml-12 mb-4;
+  @apply flex items-center text-xs p-3 ml-12 mb-4;
+  color: var(--color-text-secondary);
 }
 
 .typing-dot {
-  @apply w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce mx-0.5;
+  @apply w-1.5 h-1.5 rounded-full animate-bounce mx-0.5;
+  background-color: var(--color-text-secondary);
 }
 
 .chat-area {
-  @apply flex-1 flex flex-col bg-bg-primary;
+  @apply flex-1 flex flex-col;
+  background-color: var(--color-bg-primary);
 }
 
 .chat-messages {
@@ -816,15 +867,93 @@ select:focus {
 }
 
 .chat-spinner {
-  @apply animate-spin rounded-full h-10 w-10 border-4 border-border border-t-accent;
+  @apply animate-spin rounded-full h-10 w-10 border-4;
+  border-color: var(--color-border);
+  border-top-color: var(--color-accent);
 }
 
 .chat-empty {
-  @apply flex flex-col items-center justify-center h-full text-text-secondary p-6;
+  @apply flex flex-col items-center justify-center h-full p-6;
+  color: var(--color-text-secondary);
 }
 
 .chat-empty-icon {
-  @apply mb-6 text-border opacity-80;
+  @apply mb-6 opacity-80;
+  color: var(--color-border);
+}
+
+/* Reference message styles */
+.reference-preview {
+  @apply p-2 rounded mb-2 text-xs cursor-pointer;
+  background-color: var(--color-bg-primary);
+  border-left: 2px solid var(--color-accent);
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.reference-preview:hover {
+  opacity: 1;
+}
+
+.reference-preview-sender {
+  @apply font-medium mb-0.5;
+}
+
+.reference-preview-content {
+  @apply line-clamp-2;
+}
+
+/* Reply container styles */
+.reply-container {
+  @apply px-4 py-2 border-t;
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+.reply-header {
+  @apply flex items-center justify-between;
+}
+
+.reply-to-text {
+  @apply flex items-center text-sm;
+  color: var(--color-text-secondary);
+}
+
+.reply-username {
+  @apply font-medium ml-2;
+  color: var(--color-accent);
+}
+
+.reply-cancel {
+  @apply p-1 rounded-full;
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+}
+
+.reply-cancel:hover {
+  background-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.reply-content {
+  @apply mt-1 text-xs line-clamp-1;
+  color: var(--color-text-secondary);
+}
+
+/* Message highlight animation */
+@keyframes highlight-message {
+  0% {
+    background-color: var(--color-accent);
+    opacity: 0.2;
+  }
+  100% {
+    background-color: transparent;
+    opacity: 1;
+  }
+}
+
+.highlight-message {
+  animation: highlight-message 2s ease-out;
 }
 
 /* Animations */
@@ -866,15 +995,46 @@ select:focus {
 
 .chat-messages::-webkit-scrollbar-track,
 .project-list::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background-color: transparent;
 }
 
 .chat-messages::-webkit-scrollbar-thumb,
 .project-list::-webkit-scrollbar-thumb {
-  @apply bg-border rounded-full;
+  background-color: var(--color-border);
+  border-radius: 9999px;
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover,
 .project-list::-webkit-scrollbar-thumb:hover {
-  @apply bg-text-secondary;
+  background-color: var(--color-text-secondary);
+}
+
+.chat-reference-preview {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-left: 3px solid var(--color-accent);
+  padding: 6px 10px;
+  margin: 0 0 8px 0;
+  border-radius: 4px;
+  cursor: pointer;
+  width: calc(100% - 10px);
+  max-width: 100%;
+  display: block !important;
+}
+
+.chat-reference-sender {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+  display: block !important;
+}
+
+.chat-reference-content {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  display: block !important;
 }

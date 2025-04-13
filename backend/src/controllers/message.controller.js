@@ -17,7 +17,7 @@ const logger = winston.createLogger({
 // Create a new message
 export const createMessage = async (req, res) => {
   try {
-    const { projectId, content } = req.body
+    const { projectId, content, referenceId } = req.body
     const userId = req.user._id
 
     // Validate required fields
@@ -51,11 +51,24 @@ export const createMessage = async (req, res) => {
       })
     }
 
+    // If referenceId is provided, verify it exists and belongs to this project
+    if (referenceId) {
+      const referencedMessage = await Message.findById(referenceId)
+      if (!referencedMessage || !referencedMessage.projectId.equals(projectId)) {
+        return res.status(400).json({
+          message: "Referenced message not found or does not belong to this project",
+          data: [],
+          code: 400,
+        })
+      }
+    }
+
     // Create new message
     const newMessage = new Message({
       sender: userId,
       projectId,
       content,
+      referenceId: referenceId || null,
     })
 
     await newMessage.save()
@@ -65,7 +78,9 @@ export const createMessage = async (req, res) => {
     await project.save()
 
     // Populate sender information for the response
-    const populatedMessage = await Message.findById(newMessage._id).populate("sender", "fullName username")
+    const populatedMessage = await Message.findById(newMessage._id)
+      .populate("sender", "fullName username")
+      .populate("referenceId")
 
     // Create read receipts for all project members
     await createReadReceipts(project.members, newMessage._id, userId)
@@ -136,6 +151,13 @@ export const getProjectMessages = async (req, res) => {
       .skip(skip)
       .limit(Number.parseInt(limit))
       .populate("sender", "fullName username")
+      .populate({
+        path: "referenceId",
+        populate: {
+          path: "sender",
+          select: "fullName username",
+        },
+      })
 
     // Get total count for pagination
     const totalMessages = await Message.countDocuments({ projectId })
@@ -284,5 +306,59 @@ const getUnreadCountForProject = async (projectId, userId) => {
   } catch (error) {
     logger.error(`${new Date().toISOString()} - Error: Error counting unread messages - ${error.message}`)
     return 0
+  }
+}
+
+// Delete a message
+export const deleteMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params
+    const userId = req.user._id
+
+    // Find the message
+    const message = await Message.findById(messageId)
+
+    if (!message) {
+      return res.status(404).json({
+        message: "Message not found",
+        data: [],
+        code: 404,
+      })
+    }
+
+    // Check if user is the sender of the message
+    if (!message.sender.equals(userId)) {
+      return res.status(403).json({
+        message: "You can only delete your own messages",
+        data: [],
+        code: 403,
+      })
+    }
+
+    // Delete the message
+    await Message.findByIdAndDelete(messageId)
+
+    // Delete any read receipts associated with this message
+    await ReadReceipt.deleteMany({ messageId })
+
+    // Notify other users in the project about the deletion
+    if (global.io) {
+      global.io.to(`project:${message.projectId}`).emit("message_deleted", { messageId })
+    }
+
+    logger.info(`${new Date().toISOString()} - Success: Message deleted with ID: ${messageId}`)
+
+    return res.status(200).json({
+      message: "Message deleted successfully",
+      data: [{ messageId }],
+      code: 200,
+    })
+  } catch (error) {
+    logger.error(`${new Date().toISOString()} - Error: Error deleting message - ${error.message}`)
+    return res.status(500).json({
+      message: "Internal Server Error",
+      data: [],
+      code: 500,
+    })
   }
 }

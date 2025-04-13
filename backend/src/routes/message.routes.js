@@ -1,5 +1,6 @@
+// routes/message.routes.js
 import express from "express"
-import { createMessage, getProjectMessages, getUnreadMessageCounts } from "../controllers/message.controller.js"
+import { createMessage, getProjectMessages, getUnreadMessageCounts, deleteMessage } from "../controllers/message.controller.js"
 import { authenticateJWT } from "../middlewares/auth.middleware.js"
 
 const router = express.Router()
@@ -15,5 +16,8 @@ router.get("/project/:projectId", getProjectMessages)
 
 // Get unread message counts for all user's projects
 router.get("/unread", getUnreadMessageCounts)
+
+// Delete a message
+router.delete("/:messageId", deleteMessage)
 
 export default router
