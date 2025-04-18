@@ -26,7 +26,8 @@ const generateColor = (str) => {
     "#059669", // emerald-600
     "#4f46e5", // indigo-600
   ]
-
+  console.log(str);
+  
   // Simple hash function to get a consistent index
   let hash = 0
   for (let i = 0; i < str.length; i++) {
@@ -54,7 +55,10 @@ const ChatMessage = ({ message, allMessages, onScrollToMessage }) => {
 
   // Generate a consistent color for the sender
   const senderColor = useMemo(
-    () => generateColor(message.sender._id || message.sender.username),
+    () => {
+      console.log(message)
+      return generateColor(message.sender._id || message.sender.username)
+    },
     [message.sender._id, message.sender.username],
   )
 

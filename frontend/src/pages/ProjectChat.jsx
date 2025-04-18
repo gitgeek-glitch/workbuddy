@@ -3,8 +3,8 @@
 
 import { useEffect, useState, useRef, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useParams } from "react-router-dom"
-import { fetchProjectMessages, fetchUnreadCounts, markProjectAsRead } from "../store/slices/chatSlice"
+import { useParams, useNavigate } from "react-router-dom"
+import { fetchProjectMessages, fetchUnreadCounts, markProjectAsRead, setActiveProject } from "../store/slices/chatSlice"
 import { getProjects } from "../store/slices/projectSlice"
 import ChatMessage from "../components/chat/ChatMessage"
 import ChatInput from "../components/chat/ChatInput"
@@ -12,19 +12,60 @@ import ProjectChatList from "../components/chat/ProjectChatList"
 import TypingIndicator from "../components/chat/TypingIndicator"
 import ChatHeader from "../components/chat/ChatHeader"
 import { FiMessageSquare } from "react-icons/fi"
-import { joinProjectChat, leaveProjectChat, markMessagesAsRead } from "../services/socketService"
+import { joinProjectChat, leaveProjectChat, markMessagesAsRead, getSocket } from "../services/socketService"
 
 const ProjectChat = () => {
   const { projectId } = useParams()
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const { projects, loading: projectsLoading } = useSelector((state) => state.projects)
   const { activeProjectId, messages, loading: chatLoading, unreadCounts } = useSelector((state) => state.chat)
+  const { isAuthenticated } = useSelector((state) => state.user)
 
   const [typingUsers, setTypingUsers] = useState({})
   const [isInitialized, setIsInitialized] = useState(false)
+  const [socketReady, setSocketReady] = useState(false)
   const messagesEndRef = useRef(null)
   const messagesContainerRef = useRef(null)
   const messageRefs = useRef({})
+  const socketCheckIntervalRef = useRef(null)
+
+  // Check if socket is ready
+  useEffect(() => {
+    // Initial check
+    const checkSocket = () => {
+      const socket = getSocket()
+      const isReady = socket && socket.connected
+      setSocketReady(isReady)
+      return isReady
+    }
+
+    // Check immediately
+    const isReady = checkSocket()
+
+    // If not ready, set up an interval to check periodically
+    if (!isReady) {
+      socketCheckIntervalRef.current = setInterval(() => {
+        if (checkSocket()) {
+          // If socket becomes ready, clear the interval
+          clearInterval(socketCheckIntervalRef.current)
+        }  
+      }, 1000)
+    }
+
+    return () => {
+      if (socketCheckIntervalRef.current) {
+        clearInterval(socketCheckIntervalRef.current)
+      }
+    }
+  }, [])
+
+  // Set active project when projectId changes
+  useEffect(() => {
+    if (projectId && projectId !== activeProjectId) {
+      dispatch(setActiveProject(projectId))
+    }
+  }, [projectId, activeProjectId, dispatch])
 
   // Ensure projects are loaded
   useEffect(() => {
@@ -37,25 +78,13 @@ const ProjectChat = () => {
 
   // Handle project selection
   const handleProjectSelect = (projectId) => {
-    // Leave previous project chat room
-    if (activeProjectId) {
-      leaveProjectChat(activeProjectId)
-    }
-
-    // Join new project chat room
-    joinProjectChat(projectId)
-
-    // Mark messages as read
-    dispatch(markProjectAsRead(projectId))
-    markMessagesAsRead(projectId)
-
-    // Clear typing indicators
-    setTypingUsers({})
+    navigate(`/dashboard/chat/${projectId}`)
   }
 
-  // Join project chat room when active project changes
+  // Join project chat room when active project changes and socket is ready
   useEffect(() => {
-    if (activeProjectId) {
+    if (activeProjectId && socketReady) {
+      console.log(`Joining project chat room: ${activeProjectId}`)
       joinProjectChat(activeProjectId)
 
       // Mark messages as read
@@ -63,10 +92,11 @@ const ProjectChat = () => {
       markMessagesAsRead(activeProjectId)
 
       return () => {
+        console.log(`Leaving project chat room: ${activeProjectId}`)
         leaveProjectChat(activeProjectId)
       }
     }
-  }, [activeProjectId, dispatch])
+  }, [activeProjectId, socketReady, dispatch])
 
   // Fetch messages when active project changes
   useEffect(() => {
@@ -94,18 +124,18 @@ const ProjectChat = () => {
       element.scrollIntoView({ behavior: "smooth", block: "center" })
 
       // Highlight the message briefly
-      element.style.backgroundColor = 'var(--color-accent)';
-      element.style.opacity = '0.1';
-      
+      element.style.backgroundColor = "var(--color-accent)"
+      element.style.opacity = "0.1"
+
       setTimeout(() => {
-        element.style.backgroundColor = 'transparent';
-        element.style.opacity = '1';
-        element.style.transition = 'background-color 1s ease, opacity 1s ease';
-      }, 100);
-      
+        element.style.backgroundColor = "transparent"
+        element.style.opacity = "1"
+        element.style.transition = "background-color 1s ease, opacity 1s ease"
+      }, 100)
+
       setTimeout(() => {
-        element.style.transition = '';
-      }, 2000);
+        element.style.transition = ""
+      }, 2000)
     }
   }, [])
 
@@ -134,6 +164,13 @@ const ProjectChat = () => {
   const currentMessages = activeProjectId ? messages[activeProjectId] || [] : []
   const groupedMessages = groupMessagesByDate(currentMessages)
 
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login")
+    }
+  }, [isAuthenticated, navigate])
+
   if (projectsLoading || !isInitialized) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-64px)] bg-bg-primary">
@@ -149,11 +186,15 @@ const ProjectChat = () => {
     <div className="flex h-[calc(100vh-64px)] bg-bg-primary">
       {/* Project list sidebar */}
       <div className="w-80 border-r border-border h-full shadow-md">
-        <ProjectChatList projects={projects} onProjectSelect={handleProjectSelect} />
+        <ProjectChatList projects={projects} activeProjectId={activeProjectId} onProjectSelect={handleProjectSelect} />
       </div>
 
       {/* Chat area */}
       <div className="chat-area">
+        {!socketReady && (
+          <div className="socket-status-banner">Connecting to chat server... {/* You can style this as needed */}</div>
+        )}
+
         {activeProjectId ? (
           <>
             <ChatHeader project={currentProject} onInfoClick={() => console.log("Info clicked")} />

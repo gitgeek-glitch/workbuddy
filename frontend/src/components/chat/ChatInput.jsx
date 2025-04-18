@@ -4,14 +4,16 @@
 import { useState, useRef, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { FiSend, FiPaperclip, FiSmile, FiX } from "react-icons/fi"
-import { sendMessage, clearReplyToMessage } from "../../store/slices/chatSlice"
-import { sendTypingStatus } from "../../services/socketService"
+import { clearReplyToMessage } from "../../store/slices/chatSlice"
+import { sendMessage as socketSendMessage, sendTypingStatus } from "../../services/socketService"
 
 const ChatInput = ({ projectId }) => {
   const [message, setMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+  const [isSending, setIsSending] = useState(false)
   const dispatch = useDispatch()
   const { replyToMessage } = useSelector((state) => state.chat)
+  const { currentUser } = useSelector((state) => state.user)
   const inputRef = useRef(null)
   const typingTimeoutRef = useRef(null)
 
@@ -43,20 +45,50 @@ const ChatInput = ({ projectId }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (!message.trim()) return
+    if (!message.trim() || isSending) return
 
-    const messageData = {
-      projectId,
-      content: message.trim(),
+    setIsSending(true)
+    console.log(currentUser);
+    
+    try {
+      // Create message object with all required fields
+      const messageData = {
+        projectId,
+        content: message.trim(),
+        sender: {
+          _id: currentUser._id,
+          username: currentUser.username,
+          fullName: currentUser.fullName,
+          avatar: currentUser.avatar,
+        },
+        timestamp: new Date().toISOString(),
+        _id: `temp-${Date.now()}`, // Temporary ID until server assigns a real one
+      }
+
+      // Add reference if replying to a message
+      if (replyToMessage) {
+        messageData.referenceId = replyToMessage._id
+      }
+
+      console.log("Sending message via socket:", messageData)
+
+      // Send via socket service
+      socketSendMessage(messageData)
+
+      // Clear input
+      setMessage("")
+
+      // Clear reply if there was one
+      if (replyToMessage) {
+        dispatch(clearReplyToMessage())
+      }
+    } catch (error) {
+      console.log(error);
+      
+      console.error("Error sending message:", error)
+    } finally {
+      setIsSending(false)
     }
-
-    // Add reference if replying to a message
-    if (replyToMessage) {
-      messageData.referenceId = replyToMessage._id
-    }
-
-    dispatch(sendMessage(messageData))
-    setMessage("")
 
     // Clear typing indicator
     if (typingTimeoutRef.current) {
@@ -73,24 +105,27 @@ const ChatInput = ({ projectId }) => {
   return (
     <>
       {replyToMessage && (
-        <div className="reply-container" style={{ backgroundColor: 'var(--color-bg-secondary)', borderColor: 'var(--color-border)' }}>
+        <div
+          className="reply-container"
+          style={{ backgroundColor: "var(--color-bg-secondary)", borderColor: "var(--color-border)" }}
+        >
           <div className="reply-header">
             <div className="reply-to-text">
               <span className="mr-2">Replying to</span>
-              <span className="reply-username" style={{ color: 'var(--color-accent)' }}>
+              <span className="reply-username" style={{ color: "var(--color-accent)" }}>
                 {replyToMessage.sender.fullName || replyToMessage.sender.username}
               </span>
             </div>
             <button
               onClick={handleCancelReply}
               className="reply-cancel"
-              style={{ color: 'var(--color-text-secondary)' }}
+              style={{ color: "var(--color-text-secondary)" }}
               aria-label="Cancel reply"
             >
               <FiX size={16} />
             </button>
           </div>
-          <div className="reply-content" style={{ color: 'var(--color-text-secondary)' }}>
+          <div className="reply-content" style={{ color: "var(--color-text-secondary)" }}>
             {replyToMessage.content}
           </div>
         </div>
@@ -118,8 +153,8 @@ const ChatInput = ({ projectId }) => {
 
         <button
           type="submit"
-          disabled={!message.trim()}
-          className={`chat-input-send ${message.trim() ? "chat-input-send-active" : "chat-input-send-inactive"}`}
+          disabled={!message.trim() || isSending}
+          className={`chat-input-send ${message.trim() && !isSending ? "chat-input-send-active" : "chat-input-send-inactive"}`}
           aria-label="Send message"
         >
           <FiSend size={20} />

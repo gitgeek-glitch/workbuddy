@@ -136,16 +136,54 @@ const chatSlice = createSlice({
       // Clear reply state when changing projects
       state.replyToMessage = null
     },
+    // Inside the reducers object of chatSlice.js, update the addMessage reducer:
+
+    // In the chatSlice.js file, update the addMessage reducer:
+
+    // Inside the reducers object:
     addMessage: (state, action) => {
       const { projectId, message } = action.payload
+
+      // Ensure we have an array for this project
       if (!state.messages[projectId]) {
         state.messages[projectId] = []
       }
-      const exists = state.messages[projectId].some((m) => m._id === message._id)
-      if (!exists) {
-        state.messages[projectId].push(message)
+
+      // Check if message already exists to prevent duplicates
+      const existingMessageIndex = state.messages[projectId].findIndex(
+        (m) =>
+          // Check by ID if it's a real message
+          (message._id && m._id === message._id) ||
+          // Or by content, sender and approximate timestamp if it's a temporary message
+          (m.content === message.content &&
+            m.sender._id === message.sender._id &&
+            Math.abs(new Date(m.timestamp) - new Date(message.timestamp)) < 5000),
+      )
+
+      if (existingMessageIndex >= 0) {
+        console.log("Message already exists in state, updating:", message)
+        // If the message exists but has a temporary ID and the new message has a real ID,
+        // update the existing message with the real ID and any other server-provided data
+        if (state.messages[projectId][existingMessageIndex]._id.startsWith("temp-") && !message._id.startsWith("temp-")) {
+          state.messages[projectId][existingMessageIndex] = {
+            ...state.messages[projectId][existingMessageIndex],
+            ...message,
+            pending: false,
+          }
+        }
+      } else {
+        console.log("Adding new message to state:", message)
+        // Add message
+        state.messages[projectId].push({
+          ...message,
+          pending: message._id.startsWith("temp-"),
+        })
+        // Sort by timestamp
+        state.messages[projectId].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
       }
-    },
+    }
+
+    ,
     updateUnreadCount: (state, action) => {
       const { projectId, count, increment = false } = action.payload
       if (state.unreadCounts[projectId]) {
@@ -227,13 +265,13 @@ const chatSlice = createSlice({
       .addCase(deleteMessageForEveryone.fulfilled, (state, action) => {
         const { messageId, deletedBy, data } = action.payload
         const projectId = state.activeProjectId
-        
+
         if (state.messages[projectId]) {
           // Find the message and mark it as deleted
           const messageIndex = state.messages[projectId].findIndex(
             message => message._id === messageId
           )
-          
+
           if (messageIndex !== -1) {
             state.messages[projectId][messageIndex] = {
               ...state.messages[projectId][messageIndex],
@@ -246,7 +284,7 @@ const chatSlice = createSlice({
             }
           }
         }
-        
+
         state.loading = false
       })
       .addCase(deleteMessageForEveryone.rejected, (state, action) => {

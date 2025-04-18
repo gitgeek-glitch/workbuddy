@@ -3,11 +3,26 @@ import axios from "axios"
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Helper function to get stored token
+const getStoredToken = () => localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+
+// Helper function to set token with axios defaults
+const setAuthToken = (token) => {
+  if (token) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete axios.defaults.headers.common["Authorization"];
+  }
+};
+
 export const signupUser = createAsyncThunk("user/signup", async (signupData, { rejectWithValue }) => {
   try {
     const response = await axios.post(`${API_URL}/api/user/signup`, signupData)
     const { token, user } = response.data.data[0]
-    console.log(user);
+    
+    // Store token and set axios defaults
+    localStorage.setItem("authToken", token)
+    setAuthToken(token);
     
     // Normalize user data
     const normalizedUser = {
@@ -19,19 +34,14 @@ export const signupUser = createAsyncThunk("user/signup", async (signupData, { r
       role: user.role || "User",
       bio: user.bio || "",
       joinedDate: user.joinedDate || new Date().toLocaleDateString(),
-      // Include any other fields from user model that you want to use in the frontend
     }
 
-    localStorage.setItem("authToken", token)
-
-    return normalizedUser
+    return { user: normalizedUser, token };
   } catch (error) {
-    // Return the error message from the server
     return rejectWithValue(error.response?.data?.message || "Signup failed. Please try again.")
   }
 })
 
-// Async thunks for user actions
 export const loginUser = createAsyncThunk("user/login", async (credentials, { rejectWithValue }) => {
   try {
     const response = await axios.post(`${API_URL}/api/user/signin`, {
@@ -41,9 +51,15 @@ export const loginUser = createAsyncThunk("user/login", async (credentials, { re
 
     const { token, user } = response.data.data[0]
 
-    console.log("Login response user data:", user)
-    console.log(user);
+    // Store token appropriately
+    if (credentials.rememberMe) {
+      localStorage.setItem("authToken", token)
+    } else {
+      sessionStorage.setItem("authToken", token)
+    }
     
+    // Set token for axios requests
+    setAuthToken(token);
 
     // Normalize user data
     const normalizedUser = {
@@ -56,19 +72,10 @@ export const loginUser = createAsyncThunk("user/login", async (credentials, { re
       bio: user.bio || "",
       school: user.school || "",
       joinedDate: user.joinedDate || new Date().toLocaleDateString(),
-      // Include any other fields from user model that you want to use in the frontend
     }
 
-    // Store token appropriately
-    if (credentials.rememberMe) {
-      localStorage.setItem("authToken", token)
-    } else {
-      sessionStorage.setItem("authToken", token)
-    }
-
-    return normalizedUser
+    return { user: normalizedUser, token };
   } catch (error) {
-    // Return the error message from the server
     return rejectWithValue(error.response?.data?.message || "An error occurred during login. Please try again.")
   }
 })
@@ -78,6 +85,10 @@ export const logoutUser = createAsyncThunk("user/logout", async (_, { rejectWith
     // Remove tokens
     localStorage.removeItem("authToken")
     sessionStorage.removeItem("authToken")
+    
+    // Remove authorization header
+    setAuthToken(null);
+    
     return null
   } catch (error) {
     return rejectWithValue(error.message)
@@ -87,11 +98,14 @@ export const logoutUser = createAsyncThunk("user/logout", async (_, { rejectWith
 export const checkAuthState = createAsyncThunk("user/checkAuth", async (_, { rejectWithValue }) => {
   try {
     // Check for token in localStorage or sessionStorage
-    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+    const token = getStoredToken();
 
     if (!token) {
-      return null
+      return null;
     }
+
+    // Set token for axios requests
+    setAuthToken(token);
 
     // Validate token with backend
     try {
@@ -101,12 +115,13 @@ export const checkAuthState = createAsyncThunk("user/checkAuth", async (_, { rej
         },
       })
 
-      return response.data.data
+      return { user: response.data.data, token };
     } catch (error) {
       // If token is invalid, clear it
       localStorage.removeItem("authToken")
       sessionStorage.removeItem("authToken")
-      return null
+      setAuthToken(null);
+      return null;
     }
   } catch (error) {
     return rejectWithValue(error.message)
@@ -115,18 +130,15 @@ export const checkAuthState = createAsyncThunk("user/checkAuth", async (_, { rej
 
 export const oauthLogin = createAsyncThunk("user/oauthLogin", async (userData, { rejectWithValue }) => {
   try {
-    console.log("OAuth login data received:", userData)
-    
-    
     // The userData should already be normalized by the OAuthCallback component
     // Just ensure we have all required fields with fallbacks
     const normalizedUser = {
       id: userData.id,
       fullName: userData.name,
       email: userData.email || "",
-      avatar: userData.avatar ,
+      avatar: userData.avatar,
       provider: userData.provider || "oauth",
-      role:  "",
+      role: "",
       bio: userData.bio || "",
       school: userData.school || "",
       joinDate: userData.joinDate || new Date().toLocaleDateString(),
@@ -135,19 +147,19 @@ export const oauthLogin = createAsyncThunk("user/oauthLogin", async (userData, {
     // Handle token
     const token = userData.token || userData.credential || userData.access_token || `oauth-token-${Date.now()}`
     localStorage.setItem("authToken", token)
+    setAuthToken(token);
 
-    console.log("Normalized user data:", normalizedUser)
-    return normalizedUser
+    return { user: normalizedUser, token };
   } catch (error) {
     console.error("OAuth login error:", error)
     return rejectWithValue(error.message)
   }
 })
 
-export const updateUserProfile = createAsyncThunk("user/updateProfile", async (profileData, { rejectWithValue }) => {
+export const updateUserProfile = createAsyncThunk("user/updateProfile", async (profileData, { rejectWithValue, getState }) => {
   try {
-    // Get token from storage
-    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+    // Get token from state
+    const token = getState().user.token;
 
     if (!token) {
       return rejectWithValue("Authentication required")
@@ -159,12 +171,7 @@ export const updateUserProfile = createAsyncThunk("user/updateProfile", async (p
       }
     });
 
-    console.log(response);
-    
-
     const { user } = response.data.data[0];
-
-    console.log("Login response user data:", user)
 
     // Normalize user data
     const normalizedUser = {
@@ -177,18 +184,11 @@ export const updateUserProfile = createAsyncThunk("user/updateProfile", async (p
       bio: user.bio || "",
       school: user.school || "",
       joinedDate: user.joinedDate || new Date().toLocaleDateString(),
-      // Include any other fields from user model that you want to use in the frontend
     }
 
-    // Use the API function to update the profile
     return normalizedUser;
   } catch (error) {
-    // If the API call fails, just update the local state
-    // This is temporary until your backend is set up
-    return profileData
-
-    // Once your API is ready, use this instead:
-    // return rejectWithValue(error.response?.data?.message || "Failed to update profile")
+    return rejectWithValue(error.response?.data?.message || "Failed to update profile")
   }
 })
 
@@ -197,6 +197,7 @@ const initialState = {
   isAuthenticated: false,
   loading: false,
   error: null,
+  token: getStoredToken() // Initialize with stored token
 }
 
 const userSlice = createSlice({
@@ -220,9 +221,10 @@ const userSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false
-        state.currentUser = action.payload
+        state.currentUser = action.payload.user
         state.isAuthenticated = true
         state.error = null
+        state.token = action.payload.token
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
@@ -232,6 +234,7 @@ const userSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         state.currentUser = null
         state.isAuthenticated = false
+        state.token = null
       })
       // Check Auth State
       .addCase(checkAuthState.pending, (state) => {
@@ -239,18 +242,28 @@ const userSlice = createSlice({
       })
       .addCase(checkAuthState.fulfilled, (state, action) => {
         state.loading = false
-        state.currentUser = action.payload
-        state.isAuthenticated = !!action.payload
+        if (action.payload) {
+          state.currentUser = action.payload.user
+          state.isAuthenticated = true
+          state.token = action.payload.token
+        } else {
+          state.currentUser = null
+          state.isAuthenticated = false
+          state.token = null
+        }
       })
       .addCase(checkAuthState.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
+        state.isAuthenticated = false
+        state.token = null
       })
       // OAuth Login
       .addCase(oauthLogin.fulfilled, (state, action) => {
         state.loading = false
-        state.currentUser = action.payload
+        state.currentUser = action.payload.user
         state.isAuthenticated = true
+        state.token = action.payload.token
       })
       // Signup
       .addCase(signupUser.pending, (state) => {
@@ -259,9 +272,10 @@ const userSlice = createSlice({
       })
       .addCase(signupUser.fulfilled, (state, action) => {
         state.loading = false
-        state.currentUser = action.payload
+        state.currentUser = action.payload.user
         state.isAuthenticated = true
         state.error = null
+        state.token = action.payload.token
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false
@@ -286,4 +300,3 @@ const userSlice = createSlice({
 export const { updateUserProfileLocal, clearError } = userSlice.actions
 
 export default userSlice.reducer
-

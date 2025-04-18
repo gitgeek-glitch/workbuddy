@@ -1,18 +1,19 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { Provider, useSelector, useDispatch } from "react-redux"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import { PersistGate } from "redux-persist/integration/react"
 
-import store from "./store"
+import { store, persistor } from "./store"
 import { checkAuthState } from "./store/slices/userSlice"
 import { getProjects } from "./store/slices/projectSlice"
 import { setTheme } from "./store/slices/themeSlice"
 import { fetchNotifications } from "./store/slices/notificationSlice"
 import { fetchUnreadCounts } from "./store/slices/chatSlice"
-import { initializeSocket, requestNotificationPermission, disconnectSocket } from "./services/socketService"
+import { initializeSocket, requestNotificationPermission, getSocket } from "./services/socketService"
 
 import Layout from "./components/layout/Layout"
 import Landing from "./pages/Landing"
@@ -28,17 +29,34 @@ import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import OAuthCallback from "./pages/OAuthCallback"
 import LoadingScreen from "./components/ui/LoadingScreen"
-import { ThemeProvider } from "./context/ThemeContext"
-import { ProjectProvider } from "./context/ProjectContext"
 import Chat from "./pages/Chat"
+
+// Main App component that wraps everything with providers
+function App() {
+  return (
+    <Provider store={store}>
+      <PersistGate loading={<LoadingScreen />} persistor={persistor}>
+        <Router>
+          <AppContent />
+        </Router>
+      </PersistGate>
+    </Provider>
+  )
+}
 
 // Wrapper component that handles auth state and provides context
 const AppContent = () => {
   const dispatch = useDispatch()
-  const { isAuthenticated, loading: userLoading, currentUser, token } = useSelector((state) => state.user)
+  const { isAuthenticated, token, loading: userLoading, currentUser } = useSelector((state) => state.user)
   const { darkMode } = useSelector((state) => state.theme)
+  const [socketInitialized, setSocketInitialized] = useState(false)
+
+  console.log("🧩 AppContent mounted")
+  console.log("🔑 Auth Status:", isAuthenticated, "Token:", token)
+  console.log("🕒 User Loading:", userLoading)
 
   useEffect(() => {
+    console.log("🚀 Running initial auth and notification setup")
     // Check if user is authenticated
     dispatch(checkAuthState())
 
@@ -46,31 +64,84 @@ const AppContent = () => {
     requestNotificationPermission()
   }, [dispatch])
 
+  // Initialize socket connection when user is authenticated
   useEffect(() => {
-    // Initialize socket connection when user is authenticated
-    if (isAuthenticated && token) {
-      initializeSocket(token, store)
+    let socketCheckInterval = null
+    let mounted = true // Add this flag to prevent state updates after unmount
 
-      // Load projects, notifications, and chat unread counts
+    const initSocket = () => {
+      if (!mounted) return // Don't proceed if component is unmounting
+
+      if (isAuthenticated && token) {
+        console.log("🌐 Trying to initialize socket...")
+
+        try {
+          const socket = initializeSocket(token, store)
+          if (socket && mounted) {
+            console.log("✅ Socket initialized successfully")
+            setSocketInitialized(true)
+
+            dispatch(getProjects())
+            dispatch(fetchNotifications())
+            dispatch(fetchUnreadCounts())
+
+            if (socketCheckInterval) {
+              clearInterval(socketCheckInterval)
+              socketCheckInterval = null
+            }
+          }
+        } catch (error) {
+          console.error("❌ Socket initialization error:", error)
+        }
+      }
+    }
+
+    if (isAuthenticated && token && !socketInitialized) {
+      initSocket()
+
+      socketCheckInterval = setInterval(() => {
+        if (!mounted) return // Don't continue if component is unmounting
+
+        const socket = getSocket()
+        if (!socket) {
+          console.log("📡 No socket found, retrying...")
+          initSocket()
+        } else if (!socket.connected) {
+          console.log("🔌 Socket found but not connected, reconnecting...")
+          socket.connect()
+        } else {
+          console.log("✅ Socket is active")
+          clearInterval(socketCheckInterval)
+        }
+      }, 3000)
+    }
+
+    return () => {
+      mounted = false // Set flag to prevent further state updates
+      if (socketCheckInterval) {
+        clearInterval(socketCheckInterval)
+      }
+      console.log("🔚 Cleaning up socket connection")
+      // Don't disconnect socket on unmount, but prevent further state updates
+    }
+  }, [isAuthenticated, token, socketInitialized, dispatch])
+
+  useEffect(() => {
+    console.log("🌓 Applying theme:", darkMode ? "dark" : "light")
+    dispatch(setTheme(darkMode ? "dark" : "light"))
+  }, [darkMode, dispatch])
+
+  // Run these dispatches based on authentication status alone, not socket status
+  useEffect(() => {
+    if (isAuthenticated && token) {
       dispatch(getProjects())
       dispatch(fetchNotifications())
       dispatch(fetchUnreadCounts())
     }
-
-    // Cleanup socket connection on unmount
-    return () => {
-      if (isAuthenticated) {
-        disconnectSocket()
-      }
-    }
   }, [isAuthenticated, token, dispatch])
 
-  useEffect(() => {
-    // Apply theme
-    dispatch(setTheme(darkMode ? "dark" : "light"))
-  }, [darkMode, dispatch])
-
   if (userLoading) {
+    console.log("⌛ Loading user data...")
     return <LoadingScreen />
   }
 
@@ -111,20 +182,6 @@ const AppContent = () => {
         </Route>
       </Routes>
     </>
-  )
-}
-
-function App() {
-  return (
-    <Provider store={store}>
-      <ThemeProvider>
-        <ProjectProvider>
-          <Router>
-            <AppContent />
-          </Router>
-        </ProjectProvider>
-      </ThemeProvider>
-    </Provider>
   )
 }
 

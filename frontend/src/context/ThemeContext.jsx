@@ -28,5 +28,5 @@ export const ThemeProvider = ({ children }) => {
 }
 
 export const useTheme = () => {
-  return useContext(ThemeContext)
+  return {darkMode: useContext(ThemeContext)}
 }

@@ -38,14 +38,7 @@ const projectSchema = new mongoose.Schema({
 
   deadline: {
     type: Date,
-    default: null,
-    validate: {
-      validator: (value) => {
-        if (!value) return true
-        return value > new Date()
-      },
-      message: (props) => "Deadline must be a future date!",
-    },
+    default: null    
   },
 
   members: [memberSchema],
